@@ -122,7 +122,7 @@ func (ms *MediaServer) StartWebRTCStreaming(
 					return
 				}
 
-				// pipeline.Push(frame)
+				pipeline.Push(frame)
 			})
 			videoTrack.OnStop(func() {
 				logger.Debug("stopped")

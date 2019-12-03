@@ -38,11 +38,12 @@ func NewService(cfg *Config) (*Service, error) {
 	}
 
 	rpcConfig := &rpc.RpcServerOpts{
-		Logger:  cfg.Logger,
-		Addr:    cfg.RPCAddr,
-		Streams: streams,
-		Users:   users,
-		MS:      mediaServer,
+		Logger:          cfg.Logger,
+		Addr:            cfg.RPCAddr,
+		AuthTokenSecret: cfg.AuthTokenSecret,
+		Streams:         streams,
+		Users:           users,
+		MS:              mediaServer,
 	}
 
 	rpcServer, err := rpc.NewRpcServer(rpcConfig)
