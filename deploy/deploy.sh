@@ -66,7 +66,7 @@ function deploy() {
         --kube-context "${KUBE_CONTEXT}" \
         --install \
         --set image.tag="${VERSION}" \
-        --set config.usersRpcAddr="${ACCOUNTS_RPC_ADDR}" \
+        --set config.usersRpcAddr="${USERS_RPC_ADDR}" \
         --set config.streamsRpcAddr="${STREAMS_RPC_ADDR}" \
         --set config.rtmpUrl="${RTMP_URL}" \
         --set config.mediaServerHost="${MS_HOST}" \

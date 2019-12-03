@@ -34,6 +34,6 @@ spec:
   - port: {{ .Values.service.mediaServerPort }}
     targetPort: {{ .Values.service.mediaServerPort }}
     name: mslb
-    protocol: TCP
+    protocol: UDP
   selector:
     app: {{ .Chart.Name }}
