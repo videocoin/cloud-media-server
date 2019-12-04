@@ -102,8 +102,8 @@ func (ms *MediaServer) StartWebRTCStreaming(
 	logger := ms.logger.WithField("stream_id", streamID)
 
 	go func() {
-		// refresher := msgo.NewRefresher(2000)
-		// refresher.AddStream(incomingStream)
+		refresher := msgo.NewRefresher(10000)
+		refresher.AddStream(incomingStream)
 		// defer refresher.Stop()
 
 		if len(incomingStream.GetVideoTracks()) > 0 {
