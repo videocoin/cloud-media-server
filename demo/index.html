@@ -10,7 +10,7 @@
 
     <button onclick="start()">Start</button>
     <button onclick="stop()">Stop</button>
-
+    <div id="status">...</div>
 	<div id="conference">
 		<div id="container"></div>
     </div>
@@ -19,7 +19,9 @@
     <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
     <script type='text/javascript'>
         let container;
-        let HOST = "http://127.0.0.1:8080";
+        let HOST = "https://studio.snb.videocoin.network";
+        let TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoxLCJleHAiOjE2MDY5MjUzMzcsInN1YiI6IjI2ZGQxZTA5LTMxNTEtNGQ0ZC03NzRmLWNkMDUwM2RmOTA2NyJ9.mpSF9f5rtaIqmQpTV7lsDeHkRUjpo4UNbw_mLOgNqro";
+        let HEADERS = {"Authorization": "Bearer " + TOKEN}
 
         var pc = new RTCPeerConnection({
             sdpSemantics :'plan-b'
@@ -64,45 +66,103 @@
     
         function start() {
             container = document.getElementById('container');
-    
-            vs = navigator.mediaDevices.getUserMedia({
-                audio: true,
-                video: true
-            }).then(function(stream) {
-                console.log("stream: ", stream);
-    
-                addVideoForStream(stream, true);
-                pc.addStream(stream);
-    
-                const offer = pc.createOffer({
-                    offerToReceiveAudio: true,
-                    offerToReceiveVideo: true
-                }).then(function(offer) {
-                    console.log("offer: ", offer);
-                    console.log("sdp: \n", offer.sdp);
+            $("#status").text("Creating...");
 
-                    pc.setLocalDescription(offer);
+            $.ajax({
+                type: "POST",
+                url: HOST + "/api/v1/streams",
+                data: JSON.stringify({"name": "webrtc-test-" + Date.now(), "profile_id": "190b9d72-208d-4fa2-90b7-5b203c0025d2"}),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                headers: {
+                    "Authorization": "Bearer " + TOKEN,
+                },
+                success: function(resp) {
+                    let streamId = resp.id;
+                    $("#status").text("Running...");
 
                     $.ajax({
                         type: "POST",
-                        url: HOST + "/api/v1/ms/streams/webrtc",
-                        data: JSON.stringify({"stream_id": "test_stream_id", "sdp": offer.sdp}),
+                        url: HOST + "/api/v1/streams/" + streamId + "/run",
                         contentType: "application/json; charset=utf-8",
                         dataType: "json",
+                        headers: HEADERS,
                         success: function(resp) {
-                            console.log("answer\n", resp.sdp);
-                            const answer = new RTCSessionDescription({
-                                type: 'answer',
-                                sdp: resp.sdp
-                            });
-                            pc.setRemoteDescription(answer).then(function(data) {
-                                console.log(data);
-                            }); 
-                        },
-                    });
+                            console.log(resp);
 
-                });
-    
+                            $("#status").text("Waiting...");
+
+                            let timerId = setInterval(function() {
+                                $.ajax({
+                                    type: "GET",
+                                    url: HOST + "/api/v1/streams/" + streamId,
+                                    contentType: "application/json; charset=utf-8",
+                                    dataType: "json",
+                                    headers: HEADERS,
+                                    success: function(resp) {
+                                        $("#status").text("Waiting... (status is " + resp.status + ")");
+                                        if (resp.status == 'STREAM_STATUS_PREPARED') {
+                                            clearInterval(timerId);
+
+                                            vs = navigator.mediaDevices.getUserMedia({
+                                                audio: true,
+                                                video: true
+                                            }).then(function(stream) {
+                                                console.log("stream: ", stream);
+                                    
+                                                addVideoForStream(stream, true);
+                                                pc.addStream(stream);
+                                    
+                                                const offer = pc.createOffer({
+                                                    offerToReceiveAudio: true,
+                                                    offerToReceiveVideo: true
+                                                }).then(function(offer) {
+                                                    console.log("offer: ", offer);
+                                                    console.log("sdp: \n", offer.sdp);
+
+                                                    pc.setLocalDescription(offer);
+
+                                                    $.ajax({
+                                                        type: "POST",
+                                                        url: HOST + "/api/v1/ms/streams/webrtc",
+                                                        data: JSON.stringify({"stream_id": resp.id, "sdp": offer.sdp}),
+                                                        contentType: "application/json; charset=utf-8",
+                                                        dataType: "json",
+                                                        headers: HEADERS,
+                                                        success: function(resp) {
+                                                            console.log("answer\n", resp.sdp);
+                                                            const answer = new RTCSessionDescription({
+                                                                type: 'answer',
+                                                                sdp: resp.sdp
+                                                            });
+                                                            pc.setRemoteDescription(answer).then(function(data) {
+                                                                console.log(data);
+                                                            }); 
+                                                        },
+                                                    });
+
+                                                });
+                                    
+                                            });
+
+                                        } else if (resp.status == 'STREAM_STATUS_FAILED') {
+                                            $("#status").text("Unable to run stream");
+                                            clearInterval(timerId);
+                                        }
+                                    }
+                                })
+                            }, 2000)
+                        },
+                        error: function(err) {
+                            $("#status").text("Failed to run stream");
+                            console.log(err);
+                        }
+                    })
+                },
+                error: function(err) {
+                    $("#status").text("Failed to create stream");
+                    console.log(err);
+                }
             });
         }
 
