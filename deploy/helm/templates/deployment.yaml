@@ -32,8 +32,6 @@ spec:
                   fieldPath: status.hostIP
             - name: JAEGER_AGENT_PORT
               value: "6831"
-            - name: LOGLEVEL
-              value: "debug"
             - name: RPC_ADDR
               value: 0.0.0.0:{{ .Values.service.internalRpcPort }}
             - name: MEDIASERVER_HOST
