@@ -65,8 +65,6 @@ github.com/konsorten/go-windows-terminal-sequences
 github.com/leodido/go-urn
 # github.com/matttproud/golang_protobuf_extensions v1.0.1
 github.com/matttproud/golang_protobuf_extensions/pbutil
-# github.com/notedit/gstreamer-rtmp v0.0.0-20181226050148-9295bf2f2ca8
-github.com/notedit/gstreamer-rtmp
 # github.com/notedit/media-server-go v0.1.14
 github.com/notedit/media-server-go
 github.com/notedit/media-server-go/wrapper

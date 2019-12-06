@@ -5,10 +5,10 @@ import "C"
 import (
 	"fmt"
 
-	gstrtmp "github.com/notedit/gstreamer-rtmp"
 	msgo "github.com/notedit/media-server-go"
 	"github.com/notedit/sdp"
 	"github.com/sirupsen/logrus"
+	"github.com/videocoin/mediaserver/pkg/gstrtmp"
 )
 
 var Capabilities = map[string]*sdp.Capability{
