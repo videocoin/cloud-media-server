@@ -11,6 +11,11 @@ import (
 	"github.com/videocoin/mediaserver/pkg/gstrtmp"
 )
 
+func init() {
+	msgo.EnableDebug(true)
+	msgo.EnableLog(true)
+}
+
 var Capabilities = map[string]*sdp.Capability{
 	"audio": &sdp.Capability{
 		Codecs: []string{"opus"},
@@ -106,26 +111,32 @@ func (ms *MediaServer) StartWebRTCStreaming(
 		refresher.AddStream(incomingStream)
 		// defer refresher.Stop()
 
+		rtmpURL := fmt.Sprintf("%s/%s", ms.rtmpURL, streamID)
+		logger.Infof("restreaming to rtmp url %s", rtmpURL)
+
+		pipeline := gstrtmp.CreatePipeline(rtmpURL)
+		pipeline.Start()
+
 		if len(incomingStream.GetVideoTracks()) > 0 {
-			rtmpURL := fmt.Sprintf("%s/%s", ms.rtmpURL, streamID)
-
-			logger.Infof("restreaming to rtmp url %s", rtmpURL)
-
-			pipeline := gstrtmp.CreatePipeline(rtmpURL)
-			pipeline.Start()
-
 			videoTrack := incomingStream.GetVideoTracks()[0]
 			videoTrack.OnMediaFrame(func(frame []byte, timestamp uint) {
-				logger.Debugf("ts = %d", timestamp)
-
 				if len(frame) <= 4 {
 					return
 				}
-
-				pipeline.Push(frame)
+				pipeline.PushVideo(frame)
 			})
 			videoTrack.OnStop(func() {
-				logger.Debug("stopped")
+				logger.Debug("video track has been stopped")
+			})
+		}
+
+		if len(incomingStream.GetAudioTracks()) > 0 {
+			audioTrack := incomingStream.GetAudioTracks()[0]
+			audioTrack.OnMediaFrame(func(frame []byte, timestamp uint) {
+				pipeline.PushAudio(frame)
+			})
+			audioTrack.OnStop(func() {
+				logger.Debug("audio track has been stopped")
 			})
 		}
 	}()

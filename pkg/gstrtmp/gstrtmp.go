@@ -20,8 +20,27 @@ type Pipeline struct {
 }
 
 func CreatePipeline(rtmpUrl string) *Pipeline {
-	pipelineStr := "appsrc is-live=true do-timestamp=true name=src ! h264parse config-interval=-1 ! video/x-h264,stream-format=(string)avc ! avdec_h264 ! videorate ! video/x-raw,framerate=30/1 ! x264enc ! video/x-h264,profile=baseline ! h264parse config-interval=-1 ! queue ! flvmux streamable=true ! rtmpsink location='%s live=1'"
-	pipelineStr = fmt.Sprintf(pipelineStr, rtmpUrl)
+	pipelineStr := fmt.Sprintf(`
+appsrc is-live=true do-timestamp=true name=videosrc ! 
+h264parse config-interval=-1 ! 
+flvmux streamable=true name=mux ! 
+queue ! 
+rtmpsink sync=true location='%s live=1' 
+appsrc is-live=true do-timestamp=true name=audiosrc ! 
+queue ! 
+opusparse ! 
+opusdec ! 
+audioconvert ! 
+audioresample ! 
+audio/x-raw, rate=48000 ! 
+queue !  
+faac ! 
+audio/mpeg, rate=48000, channels=2, mpegversion=4 ! 
+aacparse ! 
+queue ! 
+mux. 
+`, rtmpUrl)
+	fmt.Println(pipelineStr)
 	pipelineStrUnsafe := C.CString(pipelineStr)
 	defer C.free(unsafe.Pointer(pipelineStrUnsafe))
 	return &Pipeline{Pipeline: C.gst_rtmp_create_pipeline(pipelineStrUnsafe)}
@@ -35,9 +54,14 @@ func (p *Pipeline) Stop() {
 	C.gst_rtmp_stop_pipeline(p.Pipeline)
 }
 
-// Push pushes a buffer on the appsrc of the GStreamer Pipeline
-func (p *Pipeline) Push(buffer []byte) {
+func (p *Pipeline) PushVideo(buffer []byte) {
 	b := C.CBytes(buffer)
 	defer C.free(unsafe.Pointer(b))
-	C.gst_rtmp_push_buffer(p.Pipeline, b, C.int(1), C.int(len(buffer)))
+	C.gst_rtmp_push_video_buffer(p.Pipeline, b, C.int(1), C.int(len(buffer)))
+}
+
+func (p *Pipeline) PushAudio(buffer []byte) {
+	b := C.CBytes(buffer)
+	defer C.free(unsafe.Pointer(b))
+	C.gst_rtmp_push_audio_buffer(p.Pipeline, b, C.int(1), C.int(len(buffer)))
 }

@@ -55,8 +55,17 @@ void gst_rtmp_start_pipeline(GstElement *pipeline) {
 
 void gst_rtmp_stop_pipeline(GstElement *pipeline) { gst_element_set_state(pipeline, GST_STATE_NULL); }
 
-void gst_rtmp_push_buffer(GstElement *pipeline, void *buffer, int mtype ,int len) {
-  GstElement *src = gst_bin_get_by_name(GST_BIN(pipeline), "src");
+void gst_rtmp_push_video_buffer(GstElement *pipeline, void *buffer, int mtype ,int len) {
+  GstElement *src = gst_bin_get_by_name(GST_BIN(pipeline), "videosrc");
+  if (src != NULL) {
+    gpointer p = g_memdup(buffer, len);
+    GstBuffer *buffer = gst_buffer_new_wrapped(p, len);
+    gst_app_src_push_buffer(GST_APP_SRC(src), buffer);
+  }
+}
+
+void gst_rtmp_push_audio_buffer(GstElement *pipeline, void *buffer, int mtype ,int len) {
+  GstElement *src = gst_bin_get_by_name(GST_BIN(pipeline), "audiosrc");
   if (src != NULL) {
     gpointer p = g_memdup(buffer, len);
     GstBuffer *buffer = gst_buffer_new_wrapped(p, len);
