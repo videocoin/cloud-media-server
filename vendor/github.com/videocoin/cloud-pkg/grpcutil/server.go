@@ -16,18 +16,10 @@ func DefaultServerOpts(logger *logrus.Entry) []grpc.ServerOption {
 	// grpclogrus.ReplaceGrpcLogger(logger)
 
 	tracerOpts := grpctracing.WithTracer(opentracing.GlobalTracer())
-	logrusOpts := []grpclogrus.Option{
-		grpclogrus.WithDecider(func(methodFullName string, err error) bool {
-			if methodFullName == "/grpc.health.v1.Health/Check" {
-				return false
-			}
-			return true
-		}),
-	}
 
 	return []grpc.ServerOption{
 		grpc.UnaryInterceptor(grpcmiddleware.ChainUnaryServer(
-			grpclogrus.UnaryServerInterceptor(logger, logrusOpts...),
+			grpclogrus.UnaryServerInterceptor(logger),
 			grpctags.UnaryServerInterceptor(),
 			grpctracing.UnaryServerInterceptor(tracerOpts),
 			grpcprometheus.UnaryServerInterceptor,
