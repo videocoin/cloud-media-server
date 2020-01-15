@@ -38,4 +38,9 @@ RUN apt-get install -y \
     gstreamer1.0-libav \
     gstreamer1.0-tools \
     gstreamer1.0-x \
-    gstreamer1.0-pulseaudio
+    gstreamer1.0-pulseaudio \
+    opus-tools \
+    libogg0 \
+    libopus0 \
+    libopus-dev \
+    libopusfile-dev

@@ -19,8 +19,8 @@
     <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
     <script type='text/javascript'>
         let container;
-        let HOST = "https://studio.snb.videocoin.network";
-        let TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoxLCJleHAiOjE2MDY5MjUzMzcsInN1YiI6IjI2ZGQxZTA5LTMxNTEtNGQ0ZC03NzRmLWNkMDUwM2RmOTA2NyJ9.mpSF9f5rtaIqmQpTV7lsDeHkRUjpo4UNbw_mLOgNqro";
+        let HOST = "https://studio.dev.videocoin.network";
+        let TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjowLCJleHAiOjE1NzkzNzQ4ODksInN1YiI6ImMwNTRmYjg3LTE4OGMtNGYwYi01NWVlLTExYTNmOGVlYzRkYyJ9.5eVqu8KeJpCsnL-KsUpWvy7onFNd66Olah05jNmoABE";
         let HEADERS = {"Authorization": "Bearer " + TOKEN}
 
         var pc = new RTCPeerConnection({
@@ -60,7 +60,7 @@
             pc.removeStream(stream);
             pc.close();
             pc = new RTCPeerConnection({
-                sdpSemantics :'plan-b'
+                // sdpSemantics :'plan-b'
             });
         }
     
@@ -71,7 +71,7 @@
             $.ajax({
                 type: "POST",
                 url: HOST + "/api/v1/streams",
-                data: JSON.stringify({"name": "webrtc-test-" + Date.now(), "profile_id": "190b9d72-208d-4fa2-90b7-5b203c0025d2"}),
+                data: JSON.stringify({"name": "webrtc-test-" + Date.now(), "profile_id": "190b9d72-208d-4fa2-90b7-5b203c0025d2", "input_type": "INPUT_TYPE_WEBRTC", "output_type": "OUTPUT_TYPE_HLS"}),
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 headers: {
@@ -137,7 +137,7 @@
                                                             });
                                                             pc.setRemoteDescription(answer).then(function(data) {
                                                                 console.log(data);
-                                                            }); 
+                                                            });
                                                         },
                                                     });
 

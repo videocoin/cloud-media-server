@@ -34,11 +34,25 @@ audioconvert !
 audioresample ! 
 audio/x-raw, rate=48000 ! 
 queue !  
-faac ! 
+voaacenc ! 
 audio/mpeg, rate=48000, channels=2, mpegversion=4 ! 
 aacparse ! 
 queue ! 
 mux. 
+`, rtmpUrl)
+	fmt.Println(pipelineStr)
+	pipelineStrUnsafe := C.CString(pipelineStr)
+	defer C.free(unsafe.Pointer(pipelineStrUnsafe))
+	return &Pipeline{Pipeline: C.gst_rtmp_create_pipeline(pipelineStrUnsafe)}
+}
+
+func CreateVideoPipeline(rtmpUrl string) *Pipeline {
+	pipelineStr := fmt.Sprintf(`
+appsrc is-live=true do-timestamp=true name=videosrc ! 
+h264parse config-interval=-1 ! 
+flvmux streamable=true name=mux ! 
+queue ! 
+rtmpsink sync=true location='%s live=1'
 `, rtmpUrl)
 	fmt.Println(pipelineStr)
 	pipelineStrUnsafe := C.CString(pipelineStr)
