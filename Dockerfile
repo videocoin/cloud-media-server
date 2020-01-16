@@ -1,7 +1,4 @@
-FROM gcr.io/videocoin-network/mediaserver-go:v0.1.0-develop-f87201a as builder
-
-RUN apt-get update
-RUN apt-get install -y opus-tools libogg0 libopus0 libopus-dev libopusfile-dev
+FROM gcr.io/videocoin-network/mediaserver-go:v0.1.0-develop-ce6ebf2 as builder
 
 RUN go build 
 
