@@ -29,6 +29,12 @@ deps:
 	cp -r $(GOPATH)/src/github.com/notedit/media-server-go/include \
 	vendor/github.com/notedit/media-server-go/include
 
+lint:
+	golangci-lint run -v
+
+docker-lint:
+	docker build -f Dockerfile.lint .
+
 docker-build-base:
 	docker build -t gcr.io/${GCP_PROJECT}/mediaserver-go:${VERSION} -f Dockerfile.base .
 
