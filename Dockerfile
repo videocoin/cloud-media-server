@@ -8,7 +8,8 @@ ADD ./ ./
 
 RUN make build
 
-FROM ubuntu
+FROM ubuntu:18.04
+
 RUN apt-get update
 RUN apt-get install -y ca-certificates \
     libgstreamer-plugins-base1.0-dev \

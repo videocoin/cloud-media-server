@@ -1,4 +1,4 @@
-FROM ubuntu as builder
+FROM ubuntu:18.04 as builder
 
 LABEL maintainer="Videocoin" description="webrtc to rtmp streamer"
 
