@@ -8,7 +8,7 @@ import (
 	"github.com/videocoin/cloud-api/rpc"
 )
 
-func (s *RpcServer) CreateWebRTCStream(ctx context.Context, req *v1.StreamRequest) (*v1.WebRTCStreamResponse, error) {
+func (s *Server) CreateWebRTCStream(ctx context.Context, req *v1.StreamRequest) (*v1.WebRTCStreamResponse, error) {
 	span := opentracing.SpanFromContext(ctx)
 	span.SetTag("stream_id", req.StreamId)
 	span.SetTag("sdp", req.Sdp)

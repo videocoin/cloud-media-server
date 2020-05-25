@@ -25,7 +25,7 @@ func newRequestValidator() *requestValidator {
 	translator := &uniEn
 
 	validate := validator.New()
-	enTrans.RegisterDefaultTranslations(validate, *translator)
+	_ = enTrans.RegisterDefaultTranslations(validate, *translator)
 
 	return &requestValidator{
 		validator:  validate,

@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func GetRandomUdpPort() int {
+func GetRandomUDPPort() int {
 	min := 10000
 	max := 65535
 	rand.Seed(time.Now().UnixNano())

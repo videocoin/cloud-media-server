@@ -1,18 +1,14 @@
 package rpc
 
 import (
-	"context"
 	"net"
 
 	"github.com/videocoin/mediaserver/mediacore"
 
-	"github.com/opentracing/opentracing-go"
 	"github.com/sirupsen/logrus"
 	v1 "github.com/videocoin/cloud-api/mediaserver/v1"
-	"github.com/videocoin/cloud-api/rpc"
 	streamsv1 "github.com/videocoin/cloud-api/streams/private/v1"
 	usersv1 "github.com/videocoin/cloud-api/users/v1"
-	"github.com/videocoin/cloud-pkg/auth"
 	"github.com/videocoin/cloud-pkg/grpcutil"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
@@ -20,7 +16,7 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
-type RpcServerOpts struct {
+type ServerOpts struct {
 	Logger          *logrus.Entry
 	Addr            string
 	AuthTokenSecret string
@@ -29,11 +25,10 @@ type RpcServerOpts struct {
 	MS              *mediacore.MediaServer
 }
 
-type RpcServer struct {
+type Server struct {
 	logger          *logrus.Entry
 	addr            string
 	authTokenSecret string
-	rtmpURL         string
 	grpc            *grpc.Server
 	listen          net.Listener
 	users           usersv1.UserServiceClient
@@ -42,7 +37,7 @@ type RpcServer struct {
 	ms              *mediacore.MediaServer
 }
 
-func NewRpcServer(opts *RpcServerOpts) (*RpcServer, error) {
+func NewServer(opts *ServerOpts) (*Server, error) {
 	grpcOpts := grpcutil.DefaultServerOpts(opts.Logger)
 	grpcServer := grpc.NewServer(grpcOpts...)
 	healthService := health.NewServer()
@@ -52,7 +47,7 @@ func NewRpcServer(opts *RpcServerOpts) (*RpcServer, error) {
 		return nil, err
 	}
 
-	rpcServer := &RpcServer{
+	rpcServer := &Server{
 		logger:          opts.Logger.WithField("system", "rpc"),
 		validator:       newRequestValidator(),
 		addr:            opts.Addr,
@@ -70,38 +65,7 @@ func NewRpcServer(opts *RpcServerOpts) (*RpcServer, error) {
 	return rpcServer, nil
 }
 
-func (s *RpcServer) Start() error {
+func (s *Server) Start() error {
 	s.logger.Infof("starting rpc server on %s", s.addr)
 	return s.grpc.Serve(s.listen)
-}
-
-func (s *RpcServer) authenticate(ctx context.Context) (string, context.Context, error) {
-	span, _ := opentracing.StartSpanFromContext(ctx, "authenticate")
-	defer span.Finish()
-
-	ctx = auth.NewContextWithSecretKey(ctx, s.authTokenSecret)
-	ctx, jwtToken, err := auth.AuthFromContext(ctx)
-	if err != nil {
-		s.logger.Warningf("failed to auth from context: %s", err)
-		return "", ctx, rpc.ErrRpcUnauthenticated
-	}
-
-	tokenType, ok := auth.TypeFromContext(ctx)
-	if ok {
-		if usersv1.TokenType(tokenType) == usersv1.TokenTypeAPI {
-			_, err := s.users.GetApiToken(context.Background(), &usersv1.ApiTokenRequest{Token: jwtToken})
-			if err != nil {
-				s.logger.Errorf("failed to get api token: %s", err)
-				return "", ctx, rpc.ErrRpcUnauthenticated
-			}
-		}
-	}
-
-	userID, ok := auth.UserIDFromContext(ctx)
-	if !ok {
-		s.logger.Warningf("failed to get user id from context: %s", err)
-		return "", ctx, rpc.ErrRpcUnauthenticated
-	}
-
-	return userID, ctx, nil
 }

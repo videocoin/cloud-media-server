@@ -17,24 +17,24 @@ func init() {
 }
 
 var Capabilities = map[string]*sdp.Capability{
-	"audio": &sdp.Capability{
+	"audio": {
 		Codecs: []string{"opus"},
 	},
-	"video": &sdp.Capability{
+	"video": {
 		Codecs: []string{"h264"},
 		Rtx:    true,
 		Rtcpfbs: []*sdp.RtcpFeedback{
-			&sdp.RtcpFeedback{
+			{
 				ID: "goog-remb",
 			},
-			&sdp.RtcpFeedback{
+			{
 				ID: "transport-cc",
 			},
-			&sdp.RtcpFeedback{
+			{
 				ID:     "ccm",
 				Params: []string{"fir"},
 			},
-			&sdp.RtcpFeedback{
+			{
 				ID:     "nack",
 				Params: []string{"pli"},
 			},

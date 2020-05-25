@@ -1,6 +1,7 @@
 package service
 
 import (
+	"github.com/sirupsen/logrus"
 	streamsv1 "github.com/videocoin/cloud-api/streams/private/v1"
 	usersv1 "github.com/videocoin/cloud-api/users/v1"
 	"github.com/videocoin/cloud-pkg/grpcutil"
@@ -9,9 +10,10 @@ import (
 )
 
 type Service struct {
-	cfg *Config
-	rpc *rpc.RpcServer
-	ms  *mediacore.MediaServer
+	cfg    *Config
+	logger *logrus.Entry
+	rpc    *rpc.Server
+	ms     *mediacore.MediaServer
 }
 
 func NewService(cfg *Config) (*Service, error) {
@@ -37,7 +39,7 @@ func NewService(cfg *Config) (*Service, error) {
 		return nil, err
 	}
 
-	rpcConfig := &rpc.RpcServerOpts{
+	rpcConfig := &rpc.ServerOpts{
 		Logger:          cfg.Logger,
 		Addr:            cfg.RPCAddr,
 		AuthTokenSecret: cfg.AuthTokenSecret,
@@ -46,27 +48,37 @@ func NewService(cfg *Config) (*Service, error) {
 		MS:              mediaServer,
 	}
 
-	rpcServer, err := rpc.NewRpcServer(rpcConfig)
+	rpcServer, err := rpc.NewServer(rpcConfig)
 	if err != nil {
 		return nil, err
 	}
 
 	svc := &Service{
-		cfg: cfg,
-		rpc: rpcServer,
-		ms:  mediaServer,
+		cfg:    cfg,
+		logger: cfg.Logger,
+		rpc:    rpcServer,
+		ms:     mediaServer,
 	}
 
 	return svc, nil
 }
 
-func (s *Service) Start() error {
-	go s.rpc.Start()
-	go s.ms.Start()
-	return nil
+func (s *Service) Start() {
+	go func() {
+		err := s.rpc.Start()
+		if err != nil {
+			s.logger.WithError(err).Fatal("failed to start rpc server")
+		}
+	}()
+
+	go func() {
+		err := s.ms.Start()
+		if err != nil {
+			s.logger.WithError(err).Fatal("failed to start media server")
+		}
+	}()
 }
 
 func (s *Service) Stop() error {
-	s.ms.Stop()
-	return nil
+	return s.ms.Stop()
 }
