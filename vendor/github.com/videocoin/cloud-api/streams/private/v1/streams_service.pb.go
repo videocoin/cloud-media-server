@@ -5,6 +5,7 @@ package v1
 
 import (
 	context "context"
+	encoding_binary "encoding/binary"
 	fmt "fmt"
 	_ "github.com/gogo/googleapis/google/api"
 	_ "github.com/gogo/protobuf/gogoproto"
@@ -37,6 +38,7 @@ const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
 type StreamRequest struct {
 	Id                   string   `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Duration             float64  `protobuf:"fixed64,2,opt,name=duration,proto3" json:"duration,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -82,6 +84,13 @@ func (m *StreamRequest) GetId() string {
 	return ""
 }
 
+func (m *StreamRequest) GetDuration() float64 {
+	if m != nil {
+		return m.Duration
+	}
+	return 0
+}
+
 func (*StreamRequest) XXX_MessageName() string {
 	return "cloud.api.streams.private.v1.StreamRequest"
 }
@@ -90,6 +99,7 @@ type StreamResponse struct {
 	ID                    string          `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	Name                  string          `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
 	ProfileID             string          `protobuf:"bytes,3,opt,name=profile_id,json=profileId,proto3" json:"profile_id,omitempty"`
+	ProfileCost           float64         `protobuf:"fixed64,16,opt,name=profile_cost,json=profileCost,proto3" json:"profile_cost,omitempty"`
 	InputURL              string          `protobuf:"bytes,4,opt,name=input_url,json=inputUrl,proto3" json:"input_url,omitempty"`
 	OutputURL             string          `protobuf:"bytes,5,opt,name=output_url,json=outputUrl,proto3" json:"output_url,omitempty"`
 	StreamContractID      uint64          `protobuf:"varint,7,opt,name=stream_contract_id,json=streamContractId,proto3" json:"stream_contract_id,omitempty"`
@@ -101,6 +111,7 @@ type StreamResponse struct {
 	ReadyAt               *time.Time      `protobuf:"bytes,12,opt,name=ready_at,json=readyAt,proto3,stdtime" json:"ready_at,omitempty"`
 	CompletedAt           *time.Time      `protobuf:"bytes,13,opt,name=completed_at,json=completedAt,proto3,stdtime" json:"completed_at,omitempty"`
 	UserID                string          `protobuf:"bytes,14,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	InputType             v1.InputType    `protobuf:"varint,15,opt,name=input_type,json=inputType,proto3,enum=cloud.api.streams.v1.InputType" json:"input_type,omitempty"`
 	XXX_NoUnkeyedLiteral  struct{}        `json:"-"`
 	XXX_unrecognized      []byte          `json:"-"`
 	XXX_sizecache         int32           `json:"-"`
@@ -158,6 +169,13 @@ func (m *StreamResponse) GetProfileID() string {
 		return m.ProfileID
 	}
 	return ""
+}
+
+func (m *StreamResponse) GetProfileCost() float64 {
+	if m != nil {
+		return m.ProfileCost
+	}
+	return 0
 }
 
 func (m *StreamResponse) GetInputURL() string {
@@ -237,14 +255,82 @@ func (m *StreamResponse) GetUserID() string {
 	return ""
 }
 
+func (m *StreamResponse) GetInputType() v1.InputType {
+	if m != nil {
+		return m.InputType
+	}
+	return v1.InputTypeRTMP
+}
+
 func (*StreamResponse) XXX_MessageName() string {
 	return "cloud.api.streams.private.v1.StreamResponse"
+}
+
+type UpdateStatusRequest struct {
+	ID                   string          `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Status               v1.StreamStatus `protobuf:"varint,2,opt,name=status,proto3,enum=cloud.api.streams.v1.StreamStatus" json:"status,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
+	XXX_unrecognized     []byte          `json:"-"`
+	XXX_sizecache        int32           `json:"-"`
+}
+
+func (m *UpdateStatusRequest) Reset()         { *m = UpdateStatusRequest{} }
+func (m *UpdateStatusRequest) String() string { return proto.CompactTextString(m) }
+func (*UpdateStatusRequest) ProtoMessage()    {}
+func (*UpdateStatusRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_55d803021125e230, []int{2}
+}
+func (m *UpdateStatusRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *UpdateStatusRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_UpdateStatusRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *UpdateStatusRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UpdateStatusRequest.Merge(m, src)
+}
+func (m *UpdateStatusRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *UpdateStatusRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_UpdateStatusRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_UpdateStatusRequest proto.InternalMessageInfo
+
+func (m *UpdateStatusRequest) GetID() string {
+	if m != nil {
+		return m.ID
+	}
+	return ""
+}
+
+func (m *UpdateStatusRequest) GetStatus() v1.StreamStatus {
+	if m != nil {
+		return m.Status
+	}
+	return v1.StreamStatusNone
+}
+
+func (*UpdateStatusRequest) XXX_MessageName() string {
+	return "cloud.api.streams.private.v1.UpdateStatusRequest"
 }
 func init() {
 	proto.RegisterType((*StreamRequest)(nil), "cloud.api.streams.private.v1.StreamRequest")
 	golang_proto.RegisterType((*StreamRequest)(nil), "cloud.api.streams.private.v1.StreamRequest")
 	proto.RegisterType((*StreamResponse)(nil), "cloud.api.streams.private.v1.StreamResponse")
 	golang_proto.RegisterType((*StreamResponse)(nil), "cloud.api.streams.private.v1.StreamResponse")
+	proto.RegisterType((*UpdateStatusRequest)(nil), "cloud.api.streams.private.v1.UpdateStatusRequest")
+	golang_proto.RegisterType((*UpdateStatusRequest)(nil), "cloud.api.streams.private.v1.UpdateStatusRequest")
 }
 
 func init() {
@@ -255,48 +341,54 @@ func init() {
 }
 
 var fileDescriptor_55d803021125e230 = []byte{
-	// 650 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x94, 0xcf, 0x6e, 0xd3, 0x40,
-	0x10, 0xc6, 0x71, 0x9a, 0x26, 0xf1, 0x26, 0x8d, 0xca, 0x8a, 0x3f, 0x56, 0xa8, 0xe2, 0x10, 0x2e,
-	0x41, 0xb4, 0xb6, 0x52, 0xa4, 0x1e, 0xe0, 0x80, 0x92, 0x46, 0x42, 0x96, 0x90, 0xa8, 0x1c, 0x7a,
-	0xe1, 0x12, 0x6d, 0xec, 0x6d, 0xba, 0xc8, 0xf6, 0x9a, 0xdd, 0xb5, 0xa5, 0xbe, 0x05, 0xbc, 0x11,
-	0xc7, 0x1e, 0x79, 0x82, 0x80, 0xdc, 0x1b, 0x4f, 0x81, 0xbc, 0x5e, 0x37, 0xa4, 0x20, 0x94, 0x4b,
-	0x6e, 0x9e, 0x99, 0xdf, 0xf7, 0xcd, 0x8e, 0x3d, 0x5e, 0x30, 0xe0, 0x82, 0x61, 0x14, 0x72, 0x3b,
-	0x66, 0x24, 0x45, 0x02, 0xdb, 0xe9, 0xd0, 0x56, 0xa9, 0x19, 0xc7, 0x2c, 0x25, 0x1e, 0xb6, 0x62,
-	0x46, 0x05, 0x85, 0x07, 0x5e, 0x40, 0x13, 0xdf, 0x42, 0x31, 0xb1, 0x14, 0x60, 0x29, 0x8d, 0x95,
-	0x0e, 0x3b, 0x4f, 0x16, 0x94, 0x2e, 0x02, 0x6c, 0x4b, 0x76, 0x9e, 0x5c, 0xd8, 0x38, 0x8c, 0xc5,
-	0x55, 0x21, 0xed, 0x98, 0x77, 0x8b, 0x82, 0x84, 0x98, 0x0b, 0x14, 0xc6, 0x0a, 0x38, 0x50, 0x00,
-	0x8a, 0x89, 0x8d, 0xa2, 0x88, 0x0a, 0x24, 0x08, 0x8d, 0xb8, 0xaa, 0x1e, 0x2d, 0x88, 0xb8, 0x4c,
-	0xe6, 0x96, 0x47, 0x43, 0x7b, 0x41, 0x17, 0x74, 0xe5, 0x93, 0x47, 0x32, 0x90, 0x4f, 0x0a, 0x3f,
-	0xf9, 0x03, 0x4f, 0x89, 0x8f, 0xa9, 0x47, 0x49, 0x64, 0xcb, 0xd3, 0x1f, 0xe5, 0x0d, 0xca, 0x89,
-	0x6f, 0x27, 0x2d, 0x74, 0x7d, 0x13, 0xec, 0x4d, 0x65, 0xec, 0xe2, 0xcf, 0x09, 0xe6, 0x02, 0xb6,
-	0x41, 0x85, 0xf8, 0x86, 0xd6, 0xd3, 0x06, 0xba, 0x5b, 0x21, 0x7e, 0xff, 0xd7, 0x2e, 0x68, 0x97,
-	0x04, 0x8f, 0x69, 0xc4, 0x31, 0x7c, 0xb4, 0x42, 0xc6, 0xb5, 0x6c, 0x69, 0x56, 0x9c, 0x49, 0x8e,
-	0x42, 0x08, 0xaa, 0x11, 0x0a, 0xb1, 0x51, 0x91, 0x62, 0xf9, 0x0c, 0x0f, 0x01, 0x88, 0x19, 0xbd,
-	0x20, 0x01, 0x9e, 0x11, 0xdf, 0xd8, 0x91, 0x9a, 0xbd, 0x6c, 0x69, 0xea, 0x67, 0x45, 0xd6, 0x99,
-	0xb8, 0xba, 0x02, 0x1c, 0x1f, 0x3e, 0x07, 0x3a, 0x89, 0xe2, 0x44, 0xcc, 0x12, 0x16, 0x18, 0x55,
-	0x09, 0xb7, 0xb2, 0xa5, 0xd9, 0x70, 0xf2, 0xe4, 0xb9, 0xfb, 0xce, 0x6d, 0xc8, 0xf2, 0x39, 0x0b,
-	0x72, 0x63, 0x9a, 0x88, 0x92, 0xdd, 0x5d, 0x19, 0xbf, 0x97, 0xd9, 0x1c, 0xd6, 0x0b, 0x20, 0xa7,
-	0xc7, 0x00, 0x16, 0x63, 0xcf, 0x3c, 0x1a, 0x09, 0x86, 0x3c, 0x91, 0x1f, 0xa7, 0xde, 0xd3, 0x06,
-	0xd5, 0xf1, 0x83, 0x6c, 0x69, 0xee, 0x17, 0x23, 0x9e, 0xaa, 0xa2, 0x33, 0x71, 0xf7, 0xf9, 0x7a,
-	0xc6, 0x87, 0x27, 0xe0, 0xf1, 0x5d, 0x0f, 0xe4, 0xfb, 0x0c, 0x73, 0x6e, 0x34, 0xe4, 0xc4, 0x0f,
-	0xd7, 0x25, 0xa3, 0xa2, 0x08, 0x5f, 0x81, 0x1a, 0x17, 0x48, 0x24, 0xdc, 0xd0, 0x7b, 0xda, 0xa0,
-	0x7d, 0xdc, 0xb7, 0xfe, 0x5e, 0xaa, 0x74, 0x68, 0x15, 0x27, 0x98, 0x4a, 0xd2, 0x55, 0x0a, 0x38,
-	0x01, 0xad, 0xe2, 0x85, 0x28, 0x07, 0x20, 0x1d, 0x9e, 0xfe, 0xdb, 0x41, 0xbe, 0x25, 0x65, 0xd0,
-	0x24, 0xab, 0x00, 0xbe, 0x01, 0xc0, 0x63, 0x18, 0x09, 0xec, 0xcf, 0x90, 0x30, 0x9a, 0x3d, 0x6d,
-	0xd0, 0x3c, 0xee, 0x58, 0xc5, 0xfa, 0x59, 0xe5, 0x5e, 0x59, 0x1f, 0xca, 0xfd, 0x1c, 0x57, 0xbf,
-	0xfc, 0x30, 0x35, 0x57, 0x57, 0x9a, 0x91, 0xc8, 0x0d, 0x92, 0xd8, 0x2f, 0x0d, 0xee, 0x6f, 0x6a,
-	0xa0, 0x34, 0x23, 0x01, 0x5f, 0x83, 0x06, 0xc3, 0xc8, 0xbf, 0xca, 0xe5, 0xad, 0x0d, 0xe5, 0x75,
-	0xa9, 0x18, 0x09, 0x78, 0x0a, 0x5a, 0x1e, 0x0d, 0xe3, 0x00, 0xab, 0xfe, 0x7b, 0x1b, 0x1a, 0x34,
-	0x6f, 0x55, 0x23, 0x01, 0x9f, 0x81, 0x7a, 0xc2, 0x31, 0xcb, 0x3f, 0x7b, 0x5b, 0x2e, 0x0b, 0xc8,
-	0x96, 0x66, 0xed, 0x9c, 0x63, 0xe6, 0x4c, 0xdc, 0x5a, 0x5e, 0x72, 0xfc, 0xe3, 0xaf, 0xd5, 0x72,
-	0xd9, 0xf9, 0xb4, 0xb8, 0x07, 0xe0, 0x1c, 0xec, 0xbc, 0xc5, 0x02, 0xbe, 0xb0, 0xfe, 0x77, 0x13,
-	0x58, 0x6b, 0xff, 0x50, 0xe7, 0x70, 0x33, 0xb8, 0xf8, 0x9d, 0xfa, 0xf7, 0xe0, 0x05, 0xa8, 0x9f,
-	0x25, 0xf3, 0x80, 0xf0, 0xcb, 0xed, 0xf6, 0xf9, 0x04, 0x9a, 0xaa, 0xcf, 0x84, 0x46, 0x78, 0xbb,
-	0xbd, 0xe6, 0x60, 0xc7, 0x4d, 0xa2, 0xed, 0xf6, 0xf0, 0x40, 0x75, 0x2a, 0x68, 0xbc, 0xd5, 0x26,
-	0x63, 0xe3, 0x3a, 0xeb, 0x6a, 0xdf, 0xb3, 0xae, 0xf6, 0x33, 0xeb, 0x6a, 0xdf, 0x6e, 0xba, 0xda,
-	0xf5, 0x4d, 0x57, 0xfb, 0x58, 0x49, 0x87, 0xf3, 0x9a, 0xdc, 0xbc, 0x97, 0xbf, 0x03, 0x00, 0x00,
-	0xff, 0xff, 0x5a, 0xc8, 0x62, 0x2d, 0x4f, 0x06, 0x00, 0x00,
+	// 740 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x54, 0xcb, 0x6e, 0xda, 0x4c,
+	0x14, 0xfe, 0x4d, 0x08, 0xe0, 0x03, 0xe1, 0x4f, 0xa7, 0x37, 0x0b, 0x45, 0x98, 0xd0, 0x0d, 0x55,
+	0x13, 0x5b, 0xa4, 0x52, 0x16, 0x8d, 0xd4, 0x8a, 0x8b, 0x54, 0x21, 0x55, 0x6a, 0x64, 0xc2, 0xa6,
+	0x1b, 0x64, 0xec, 0x09, 0x99, 0x0a, 0x3c, 0x8e, 0x67, 0x6c, 0x29, 0x6f, 0xd1, 0x47, 0xea, 0x32,
+	0x9b, 0x4a, 0x7d, 0x02, 0x5a, 0x39, 0xeb, 0xbe, 0x43, 0xe5, 0xf1, 0x38, 0x24, 0x6d, 0x1a, 0x91,
+	0x05, 0x3b, 0xcf, 0x99, 0xef, 0x32, 0x73, 0xfc, 0xcd, 0x81, 0x16, 0xe3, 0x01, 0xb6, 0xe7, 0xcc,
+	0xf4, 0x03, 0x12, 0xd9, 0x1c, 0x9b, 0x51, 0xdb, 0x94, 0xa5, 0x31, 0xc3, 0x41, 0x44, 0x1c, 0x6c,
+	0xf8, 0x01, 0xe5, 0x14, 0xed, 0x38, 0x33, 0x1a, 0xba, 0x86, 0xed, 0x13, 0x43, 0x02, 0x0c, 0xc9,
+	0x31, 0xa2, 0x76, 0x4d, 0x9f, 0x52, 0x3a, 0x9d, 0x61, 0x53, 0x60, 0x27, 0xe1, 0xa9, 0xc9, 0xc9,
+	0x1c, 0x33, 0x6e, 0xcf, 0xfd, 0x94, 0x5e, 0xdb, 0x91, 0x00, 0xdb, 0x27, 0xa6, 0xed, 0x79, 0x94,
+	0xdb, 0x9c, 0x50, 0x8f, 0xc9, 0xdd, 0xfd, 0x29, 0xe1, 0x67, 0xe1, 0xc4, 0x70, 0xe8, 0xdc, 0x9c,
+	0xd2, 0x29, 0x5d, 0xea, 0x24, 0x2b, 0xb1, 0x10, 0x5f, 0x12, 0x7e, 0x78, 0x03, 0x1e, 0x11, 0x17,
+	0x53, 0x87, 0x12, 0xcf, 0x14, 0x07, 0xdc, 0x4f, 0x0c, 0xb2, 0x4b, 0x5d, 0x5f, 0x26, 0xe5, 0x35,
+	0x8f, 0x60, 0x6b, 0x28, 0xd6, 0x16, 0x3e, 0x0f, 0x31, 0xe3, 0xa8, 0x0a, 0x39, 0xe2, 0x6a, 0x4a,
+	0x43, 0x69, 0xa9, 0x56, 0x8e, 0xb8, 0xa8, 0x06, 0x25, 0x37, 0x0c, 0xc4, 0xd1, 0xb4, 0x5c, 0x43,
+	0x69, 0x29, 0xd6, 0xf5, 0xba, 0xf9, 0xad, 0x00, 0xd5, 0x8c, 0xcd, 0x7c, 0xea, 0x31, 0x8c, 0x9e,
+	0x2d, 0xe9, 0xdd, 0x42, 0xbc, 0xd0, 0x73, 0x83, 0xbe, 0x90, 0x41, 0x90, 0xf7, 0xec, 0x39, 0x16,
+	0x12, 0xaa, 0x25, 0xbe, 0xd1, 0x1e, 0x80, 0x1f, 0xd0, 0x53, 0x32, 0xc3, 0x63, 0xe2, 0x6a, 0x1b,
+	0x82, 0xb3, 0x15, 0x2f, 0x74, 0xf5, 0x38, 0xad, 0x0e, 0xfa, 0x96, 0x2a, 0x01, 0x03, 0x17, 0xed,
+	0x42, 0x25, 0x43, 0x3b, 0x94, 0x71, 0x6d, 0x5b, 0x1c, 0xa6, 0x2c, 0x6b, 0x3d, 0xca, 0x38, 0x7a,
+	0x09, 0x2a, 0xf1, 0xfc, 0x90, 0x8f, 0xc3, 0x60, 0xa6, 0xe5, 0x85, 0x5e, 0x25, 0x5e, 0xe8, 0xa5,
+	0x41, 0x52, 0x1c, 0x59, 0x1f, 0xac, 0x92, 0xd8, 0x1e, 0x05, 0xb3, 0xc4, 0x9b, 0x86, 0x3c, 0xc3,
+	0x6e, 0x2e, 0xbd, 0x3f, 0x8a, 0x6a, 0x02, 0x56, 0x53, 0x40, 0x82, 0xee, 0x02, 0x4a, 0xbb, 0x36,
+	0x76, 0xa8, 0xc7, 0x03, 0xdb, 0xe1, 0xc9, 0x89, 0x8b, 0x0d, 0xa5, 0x95, 0xef, 0x3e, 0x89, 0x17,
+	0xfa, 0x76, 0xda, 0x85, 0x9e, 0xdc, 0x1c, 0xf4, 0xad, 0x6d, 0x76, 0xbb, 0xe2, 0xa2, 0x43, 0x78,
+	0xfe, 0xa7, 0x86, 0xed, 0xba, 0x01, 0x66, 0x4c, 0x2b, 0x89, 0xa6, 0x3c, 0xbd, 0x4d, 0xe9, 0xa4,
+	0x9b, 0xe8, 0x0d, 0x14, 0x18, 0xb7, 0x79, 0xc8, 0x34, 0xb5, 0xa1, 0xb4, 0xaa, 0x07, 0x4d, 0xe3,
+	0xef, 0xd8, 0x45, 0x6d, 0x23, 0x3d, 0xc1, 0x50, 0x20, 0x2d, 0xc9, 0x40, 0x7d, 0xa8, 0xa4, 0x0d,
+	0x91, 0x0a, 0x20, 0x14, 0x76, 0xef, 0x56, 0x10, 0x5d, 0x92, 0x02, 0x65, 0xb2, 0x5c, 0xa0, 0x77,
+	0x00, 0x4e, 0x80, 0x6d, 0x8e, 0xdd, 0xb1, 0xcd, 0xb5, 0x72, 0x43, 0x69, 0x95, 0x0f, 0x6a, 0x46,
+	0x9a, 0x5e, 0x23, 0x8b, 0xa5, 0x71, 0x92, 0xc5, 0xbb, 0x9b, 0xff, 0xf2, 0x43, 0x57, 0x2c, 0x55,
+	0x72, 0x3a, 0x3c, 0x11, 0x08, 0x7d, 0x37, 0x13, 0x78, 0xb4, 0xaa, 0x80, 0xe4, 0x74, 0x38, 0x3a,
+	0x82, 0x52, 0x80, 0x6d, 0xf7, 0x22, 0xa1, 0x57, 0x56, 0xa4, 0x17, 0x05, 0xa3, 0xc3, 0x51, 0x0f,
+	0x2a, 0x0e, 0x9d, 0xfb, 0x33, 0x2c, 0xfd, 0xb7, 0x56, 0x14, 0x28, 0x5f, 0xb3, 0x3a, 0x1c, 0xbd,
+	0x80, 0x62, 0xc8, 0x70, 0x90, 0xfc, 0xf6, 0xaa, 0x08, 0x0b, 0xc4, 0x0b, 0xbd, 0x30, 0x62, 0x38,
+	0x18, 0xf4, 0xad, 0x42, 0xb2, 0x35, 0x70, 0xd1, 0x5b, 0x80, 0xb4, 0xdd, 0xfc, 0xc2, 0xc7, 0xda,
+	0xff, 0xa2, 0xd9, 0xfa, 0x3d, 0xcd, 0x3e, 0xb9, 0xf0, 0xb1, 0x95, 0x46, 0x36, 0xf9, 0x6c, 0x12,
+	0x78, 0x3c, 0x12, 0x77, 0x96, 0x7f, 0x41, 0x3e, 0xc9, 0x7f, 0xbd, 0xa9, 0x65, 0x32, 0x72, 0x0f,
+	0x4d, 0xc6, 0xc1, 0xaf, 0xcd, 0xec, 0xe9, 0xb2, 0x61, 0x3a, 0xd4, 0xd0, 0x04, 0x36, 0xde, 0x63,
+	0x8e, 0x5e, 0x19, 0xf7, 0x8d, 0x35, 0xe3, 0xd6, 0xb4, 0xa8, 0xed, 0xad, 0x06, 0x4e, 0x87, 0x43,
+	0xf3, 0x3f, 0x74, 0x0a, 0xc5, 0xe3, 0x70, 0x32, 0x23, 0xec, 0x6c, 0xbd, 0x3e, 0x9f, 0xa1, 0x2c,
+	0x7d, 0xfa, 0xd4, 0xc3, 0xeb, 0xf5, 0x9a, 0x42, 0xa9, 0x27, 0x93, 0xb2, 0x5e, 0xa3, 0x09, 0x6c,
+	0x58, 0xa1, 0xb7, 0x5e, 0x0f, 0x07, 0xf2, 0x43, 0x4e, 0xfd, 0xf5, 0x9a, 0x9c, 0x43, 0xe5, 0x66,
+	0xce, 0x51, 0xfb, 0x7e, 0xfe, 0x1d, 0x6f, 0xe2, 0xa1, 0x96, 0x5d, 0xed, 0x32, 0xae, 0x2b, 0xdf,
+	0xe3, 0xba, 0xf2, 0x33, 0xae, 0x2b, 0x5f, 0xaf, 0xea, 0xca, 0xe5, 0x55, 0x5d, 0xf9, 0x94, 0x8b,
+	0xda, 0x93, 0x82, 0x18, 0x00, 0xaf, 0x7f, 0x07, 0x00, 0x00, 0xff, 0xff, 0x38, 0x59, 0xbf, 0x83,
+	0xf8, 0x07, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -314,8 +406,10 @@ type StreamsServiceClient interface {
 	Get(ctx context.Context, in *StreamRequest, opts ...grpc.CallOption) (*StreamResponse, error)
 	Publish(ctx context.Context, in *StreamRequest, opts ...grpc.CallOption) (*StreamResponse, error)
 	PublishDone(ctx context.Context, in *StreamRequest, opts ...grpc.CallOption) (*StreamResponse, error)
+	Complete(ctx context.Context, in *StreamRequest, opts ...grpc.CallOption) (*StreamResponse, error)
 	Run(ctx context.Context, in *StreamRequest, opts ...grpc.CallOption) (*StreamResponse, error)
 	Stop(ctx context.Context, in *StreamRequest, opts ...grpc.CallOption) (*StreamResponse, error)
+	UpdateStatus(ctx context.Context, in *UpdateStatusRequest, opts ...grpc.CallOption) (*StreamResponse, error)
 }
 
 type streamsServiceClient struct {
@@ -353,6 +447,15 @@ func (c *streamsServiceClient) PublishDone(ctx context.Context, in *StreamReques
 	return out, nil
 }
 
+func (c *streamsServiceClient) Complete(ctx context.Context, in *StreamRequest, opts ...grpc.CallOption) (*StreamResponse, error) {
+	out := new(StreamResponse)
+	err := c.cc.Invoke(ctx, "/cloud.api.streams.private.v1.StreamsService/Complete", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *streamsServiceClient) Run(ctx context.Context, in *StreamRequest, opts ...grpc.CallOption) (*StreamResponse, error) {
 	out := new(StreamResponse)
 	err := c.cc.Invoke(ctx, "/cloud.api.streams.private.v1.StreamsService/Run", in, out, opts...)
@@ -371,13 +474,24 @@ func (c *streamsServiceClient) Stop(ctx context.Context, in *StreamRequest, opts
 	return out, nil
 }
 
+func (c *streamsServiceClient) UpdateStatus(ctx context.Context, in *UpdateStatusRequest, opts ...grpc.CallOption) (*StreamResponse, error) {
+	out := new(StreamResponse)
+	err := c.cc.Invoke(ctx, "/cloud.api.streams.private.v1.StreamsService/UpdateStatus", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // StreamsServiceServer is the server API for StreamsService service.
 type StreamsServiceServer interface {
 	Get(context.Context, *StreamRequest) (*StreamResponse, error)
 	Publish(context.Context, *StreamRequest) (*StreamResponse, error)
 	PublishDone(context.Context, *StreamRequest) (*StreamResponse, error)
+	Complete(context.Context, *StreamRequest) (*StreamResponse, error)
 	Run(context.Context, *StreamRequest) (*StreamResponse, error)
 	Stop(context.Context, *StreamRequest) (*StreamResponse, error)
+	UpdateStatus(context.Context, *UpdateStatusRequest) (*StreamResponse, error)
 }
 
 // UnimplementedStreamsServiceServer can be embedded to have forward compatible implementations.
@@ -393,11 +507,17 @@ func (*UnimplementedStreamsServiceServer) Publish(ctx context.Context, req *Stre
 func (*UnimplementedStreamsServiceServer) PublishDone(ctx context.Context, req *StreamRequest) (*StreamResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PublishDone not implemented")
 }
+func (*UnimplementedStreamsServiceServer) Complete(ctx context.Context, req *StreamRequest) (*StreamResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Complete not implemented")
+}
 func (*UnimplementedStreamsServiceServer) Run(ctx context.Context, req *StreamRequest) (*StreamResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Run not implemented")
 }
 func (*UnimplementedStreamsServiceServer) Stop(ctx context.Context, req *StreamRequest) (*StreamResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Stop not implemented")
+}
+func (*UnimplementedStreamsServiceServer) UpdateStatus(ctx context.Context, req *UpdateStatusRequest) (*StreamResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateStatus not implemented")
 }
 
 func RegisterStreamsServiceServer(s *grpc.Server, srv StreamsServiceServer) {
@@ -458,6 +578,24 @@ func _StreamsService_PublishDone_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _StreamsService_Complete_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(StreamRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StreamsServiceServer).Complete(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/cloud.api.streams.private.v1.StreamsService/Complete",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StreamsServiceServer).Complete(ctx, req.(*StreamRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _StreamsService_Run_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(StreamRequest)
 	if err := dec(in); err != nil {
@@ -494,6 +632,24 @@ func _StreamsService_Stop_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _StreamsService_UpdateStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateStatusRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StreamsServiceServer).UpdateStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/cloud.api.streams.private.v1.StreamsService/UpdateStatus",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StreamsServiceServer).UpdateStatus(ctx, req.(*UpdateStatusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _StreamsService_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "cloud.api.streams.private.v1.StreamsService",
 	HandlerType: (*StreamsServiceServer)(nil),
@@ -511,12 +667,20 @@ var _StreamsService_serviceDesc = grpc.ServiceDesc{
 			Handler:    _StreamsService_PublishDone_Handler,
 		},
 		{
+			MethodName: "Complete",
+			Handler:    _StreamsService_Complete_Handler,
+		},
+		{
 			MethodName: "Run",
 			Handler:    _StreamsService_Run_Handler,
 		},
 		{
 			MethodName: "Stop",
 			Handler:    _StreamsService_Stop_Handler,
+		},
+		{
+			MethodName: "UpdateStatus",
+			Handler:    _StreamsService_UpdateStatus_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -546,6 +710,12 @@ func (m *StreamRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	if m.XXX_unrecognized != nil {
 		i -= len(m.XXX_unrecognized)
 		copy(dAtA[i:], m.XXX_unrecognized)
+	}
+	if m.Duration != 0 {
+		i -= 8
+		encoding_binary.LittleEndian.PutUint64(dAtA[i:], uint64(math.Float64bits(float64(m.Duration))))
+		i--
+		dAtA[i] = 0x11
 	}
 	if len(m.Id) > 0 {
 		i -= len(m.Id)
@@ -592,6 +762,19 @@ func (m *StreamResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		dAtA[i] = 0x1
 		i--
 		dAtA[i] = 0x8a
+	}
+	if m.ProfileCost != 0 {
+		i -= 8
+		encoding_binary.LittleEndian.PutUint64(dAtA[i:], uint64(math.Float64bits(float64(m.ProfileCost))))
+		i--
+		dAtA[i] = 0x1
+		i--
+		dAtA[i] = 0x81
+	}
+	if m.InputType != 0 {
+		i = encodeVarintStreamsService(dAtA, i, uint64(m.InputType))
+		i--
+		dAtA[i] = 0x78
 	}
 	if len(m.UserID) > 0 {
 		i -= len(m.UserID)
@@ -690,6 +873,45 @@ func (m *StreamResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
+func (m *UpdateStatusRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *UpdateStatusRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *UpdateStatusRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
+	}
+	if m.Status != 0 {
+		i = encodeVarintStreamsService(dAtA, i, uint64(m.Status))
+		i--
+		dAtA[i] = 0x10
+	}
+	if len(m.ID) > 0 {
+		i -= len(m.ID)
+		copy(dAtA[i:], m.ID)
+		i = encodeVarintStreamsService(dAtA, i, uint64(len(m.ID)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
 func encodeVarintStreamsService(dAtA []byte, offset int, v uint64) int {
 	offset -= sovStreamsService(v)
 	base := offset
@@ -710,6 +932,9 @@ func (m *StreamRequest) Size() (n int) {
 	l = len(m.Id)
 	if l > 0 {
 		n += 1 + l + sovStreamsService(uint64(l))
+	}
+	if m.Duration != 0 {
+		n += 9
 	}
 	if m.XXX_unrecognized != nil {
 		n += len(m.XXX_unrecognized)
@@ -772,9 +997,34 @@ func (m *StreamResponse) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovStreamsService(uint64(l))
 	}
+	if m.InputType != 0 {
+		n += 1 + sovStreamsService(uint64(m.InputType))
+	}
+	if m.ProfileCost != 0 {
+		n += 10
+	}
 	if m.UpdatedAt != nil {
 		l = github_com_gogo_protobuf_types.SizeOfStdTime(*m.UpdatedAt)
 		n += 2 + l + sovStreamsService(uint64(l))
+	}
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
+	}
+	return n
+}
+
+func (m *UpdateStatusRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.ID)
+	if l > 0 {
+		n += 1 + l + sovStreamsService(uint64(l))
+	}
+	if m.Status != 0 {
+		n += 1 + sovStreamsService(uint64(m.Status))
 	}
 	if m.XXX_unrecognized != nil {
 		n += len(m.XXX_unrecognized)
@@ -849,6 +1099,17 @@ func (m *StreamRequest) Unmarshal(dAtA []byte) error {
 			}
 			m.Id = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
+		case 2:
+			if wireType != 1 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Duration", wireType)
+			}
+			var v uint64
+			if (iNdEx + 8) > l {
+				return io.ErrUnexpectedEOF
+			}
+			v = uint64(encoding_binary.LittleEndian.Uint64(dAtA[iNdEx:]))
+			iNdEx += 8
+			m.Duration = float64(math.Float64frombits(v))
 		default:
 			iNdEx = preIndex
 			skippy, err := skipStreamsService(dAtA[iNdEx:])
@@ -1292,6 +1553,36 @@ func (m *StreamResponse) Unmarshal(dAtA []byte) error {
 			}
 			m.UserID = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
+		case 15:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field InputType", wireType)
+			}
+			m.InputType = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowStreamsService
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.InputType |= v1.InputType(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 16:
+			if wireType != 1 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ProfileCost", wireType)
+			}
+			var v uint64
+			if (iNdEx + 8) > l {
+				return io.ErrUnexpectedEOF
+			}
+			v = uint64(encoding_binary.LittleEndian.Uint64(dAtA[iNdEx:]))
+			iNdEx += 8
+			m.ProfileCost = float64(math.Float64frombits(v))
 		case 17:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field UpdatedAt", wireType)
@@ -1328,6 +1619,111 @@ func (m *StreamResponse) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipStreamsService(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthStreamsService
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthStreamsService
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *UpdateStatusRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowStreamsService
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: UpdateStatusRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: UpdateStatusRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ID", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowStreamsService
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthStreamsService
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthStreamsService
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ID = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Status", wireType)
+			}
+			m.Status = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowStreamsService
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Status |= v1.StreamStatus(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
 		default:
 			iNdEx = preIndex
 			skippy, err := skipStreamsService(dAtA[iNdEx:])

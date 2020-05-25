@@ -13,7 +13,7 @@ require (
 	github.com/sirupsen/logrus v1.4.2
 	github.com/videocoin/cloud-api v0.2.15
 	github.com/videocoin/cloud-pkg v0.0.6
-	google.golang.org/grpc v1.25.1
+	google.golang.org/grpc v1.27.1
 	gopkg.in/go-playground/validator.v9 v9.30.2
 	gopkg.in/hraban/opus.v2 v2.0.0-20191117073431-57179dff69a6 // indirect
 )
