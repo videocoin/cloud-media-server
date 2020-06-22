@@ -16,14 +16,25 @@ spec:
       name: {{ .Release.Name }}
       labels:
         app: {{ .Release.Name }}
+    {{- with .Values.annotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
     spec:
+    {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      serviceAccountName: {{ .Values.serviceAccount.name }}
+      automountServiceAccountToken: true
       containers:
         - name: {{ .Release.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["bash", "-c", "source /vault/secrets/common && source /vault/secrets/config && /mediaserver"]
           ports:
-            - containerPort: {{ .Values.service.internalRpcPort }}
-            - containerPort: {{ .Values.service.mediaServerPort }}
+            - containerPort: {{ .Values.service.ports.grpc }}
+            - containerPort: {{ .Values.service.ports.ms }}
               protocol: UDP
           env:
             - name: JAEGER_AGENT_HOST
@@ -32,42 +43,9 @@ spec:
                   fieldPath: status.hostIP
             - name: JAEGER_AGENT_PORT
               value: "6831"
-            - name: RPC_ADDR
-              value: 0.0.0.0:{{ .Values.service.internalRpcPort }}
-            - name: MEDIASERVER_HOST
-              value: {{ .Values.config.mediaServerHost }}
-            - name: MEDIASERVER_PORT
-              value: "{{ .Values.service.mediaServerPort }}"
-            - name: USERS_RPC_ADDR
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ .Chart.Name }}
-                  key: usersRpcAddr
-            - name: STREAMS_RPC_ADDR
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ .Chart.Name }}
-                  key: streamsRpcAddr
-            - name: RTMP_URL
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ .Chart.Name }}
-                  key: rtmpUrl
-            - name: BUCKET
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ .Chart.Name }}
-                  key: bucket
-            - name: AUTH_TOKEN_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Chart.Name }}
-                  key: authTokenSecret
-            - name: SENTRY_DSN
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Chart.Name }}
-                  key: sentryDsn
+          envFrom:
+            - configMapRef:
+                name: {{ .Chart.Name }}
           {{- if .Values.resources }}
           resources:
 {{ toYaml .Values.resources | indent 12 }}
@@ -76,8 +54,7 @@ spec:
         - name: config
           configMap:
             name: {{ .Release.Name }}
-        - name: secrets
-          secret:
-            secretName: {{ .Release.Name }}
+    {{- with .Values.nodeSelector }}
       nodeSelector:
-        cloud.google.com/gke-nodepool: api
+        {{- toYaml . | nindent 8 }}
+    {{- end }}

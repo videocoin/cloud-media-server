@@ -2,17 +2,26 @@ replicasCount: 1
 maxUnavailableCount: 0
 
 image:
-  repository: gcr.io/videocoin-network/mediaserver
+  repository: registry.videocoin.net/cloud/mediaserver
   tag: latest
   pullPolicy: Always
+  pullSecrets: 
+  - name: regcred
 
-config: {}
+serviceAccount:
+  name: default
+
+config:
+  USERS_RPC_ADDR: "users.console.svc.cluster.local:5000"
+  STREAMS_RPC_ADDR: "streams.console.svc.cluster.local:5102"
+  MEDIASERVER_HOST: "34.66.65.9"
+  MEDIASERVER_PORT: "6000"
 
 service:
-  type: ClusterIP
-  externalRpcPort: 5090
-  internalRpcPort: 5090
-  mediaServerPort: "6000"
+  loadBalancerIP: "34.66.65.9"
+  ports:
+    grpc: 5090
+    ms: 6000
 
 autoscaler:
   minCount: 1
@@ -20,5 +29,24 @@ autoscaler:
   targets:
     targetCPUUtilizationPercentage: 70
 
-secrets:
-  sentryDsn: ""
+ingress:
+  enabled: false
+  host: ms.dev.videocoinapis.com
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-dns-prod
+    kubernetes.io/ingress.class: nginx
+  secret: tls-cert-console-mediaserver
+
+annotations:
+  vault.hashicorp.com/agent-inject: "true"
+  vault.hashicorp.com/role: "console-mediaserver"
+  vault.hashicorp.com/agent-inject-secret-common: "videocoin/v1/networks/everest-dev/console/common"
+  vault.hashicorp.com/agent-inject-secret-config: "videocoin/v1/networks/everest-dev/console/mediaserver"
+  vault.hashicorp.com/agent-inject-template-common: |
+    {{ with secret "videocoin/v1/networks/everest-dev/console/common" }}{{ range $k, $v := .Data }}
+    export {{ $k }}="{{ $v }}"
+    {{ end }}{{ end }}
+  vault.hashicorp.com/agent-inject-template-config: |
+    {{ with secret "videocoin/v1/networks/everest-dev/console/mediaserver" }}{{ range $k, $v := .Data }}
+    export {{ $k }}="{{ $v }}"
+    {{ end }}{{ end }}
