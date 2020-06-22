@@ -1,4 +1,4 @@
-FROM gcr.io/videocoin-network/mediaserver-go:v0.1.0-develop-ce6ebf2 as builder
+FROM registry.videocoin.net/cloud/mediaserver-go:v1.0.0 as builder
 
 RUN go build 
 
