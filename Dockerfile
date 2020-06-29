@@ -2,7 +2,7 @@ FROM gcr.io/videocoin-network/mediaserver-go:v0.1.0-develop-ce6ebf2 as builder
 
 RUN go build 
 
-WORKDIR /go/src/github.com/videocoin/mediaserver
+WORKDIR /go/src/github.com/videocoin/cloud-media-server
 
 ADD ./ ./
 
@@ -28,7 +28,7 @@ RUN apt-get install -y ca-certificates \
     libopus-dev \
     libopusfile-dev
 
-COPY --from=builder /go/src/github.com/videocoin/mediaserver/bin/mediaserver /mediaserver
+COPY --from=builder /go/src/github.com/videocoin/cloud-media-server/bin/mediaserver /mediaserver
 
 WORKDIR /
 
