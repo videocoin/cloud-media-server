@@ -8,7 +8,7 @@ import (
 	msgo "github.com/notedit/media-server-go"
 	"github.com/notedit/sdp"
 	"github.com/sirupsen/logrus"
-	"github.com/videocoin/mediaserver/pkg/gstrtmp"
+	"github.com/videocoin/cloud-media-server/pkg/gstrtmp"
 )
 
 func init() {

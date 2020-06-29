@@ -8,7 +8,7 @@ ADD ./ ./
 
 RUN make build
 
-FROM ubuntu:18.04
+FROM jrottenberg/ffmpeg:4.1-ubuntu
 
 RUN apt-get update
 RUN apt-get install -y ca-certificates \

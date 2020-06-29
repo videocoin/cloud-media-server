@@ -57,6 +57,7 @@ function get_vars() {
     readonly RTMP_URL=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/vars/rtmpUrl`
     readonly LB_IP=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/vars/loadBalancerIP`
     readonly MS_HOST=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/vars/msHost`
+    readonly BUCKET=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/vars/bucket`
 
     readonly AUTH_TOKEN_SECRET=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/secrets/authTokenSecret`
     readonly SENTRY_DSN=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/secrets/sentryDsn`
@@ -74,6 +75,7 @@ function deploy() {
         --set config.streamsRpcAddr="${STREAMS_RPC_ADDR}" \
         --set config.rtmpUrl="${RTMP_URL}" \
         --set config.mediaServerHost="${MS_HOST}" \
+        --set config.bucket="${BUCKET}" \
         --set service.loadBalancerIP="${LB_IP}" \
         --set secrets.authTokenSecret="${AUTH_TOKEN_SECRET}" \
         --set secrets.sentryDsn="${SENTRY_DSN}" \
