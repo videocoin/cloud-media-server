@@ -1,9 +1,10 @@
 package rpc
 
 import (
-	"cloud.google.com/go/storage"
+	"context"
 	"net"
 
+	"cloud.google.com/go/storage"
 	"github.com/sirupsen/logrus"
 	v1 "github.com/videocoin/cloud-api/mediaserver/v1"
 	streamsv1 "github.com/videocoin/cloud-api/streams/private/v1"
@@ -20,17 +21,17 @@ type ServerOpts struct {
 	Logger          *logrus.Entry
 	Addr            string
 	AuthTokenSecret string
+	Bucket          string
 	Users           usersv1.UserServiceClient
 	Streams         streamsv1.StreamsServiceClient
 	MS              *mediacore.MediaServer
-	GS              *storage.Client
-	BH              *storage.BucketHandle
 }
 
 type Server struct {
 	logger          *logrus.Entry
 	addr            string
 	authTokenSecret string
+	bucket          string
 	grpc            *grpc.Server
 	listen          net.Listener
 	users           usersv1.UserServiceClient
@@ -53,18 +54,30 @@ func NewServer(opts *ServerOpts) (*Server, error) {
 		return nil, err
 	}
 
+	gscli, err := storage.NewClient(context.Background())
+	if err != nil {
+		return nil, err
+	}
+
+	bh := gscli.Bucket(opts.Bucket)
+	_, err = bh.Attrs(context.Background())
+	if err != nil {
+		return nil, err
+	}
+
 	rpcServer := &Server{
 		logger:          opts.Logger.WithField("system", "rpc"),
 		validator:       newRequestValidator(),
 		addr:            opts.Addr,
 		authTokenSecret: opts.AuthTokenSecret,
+		bucket:          opts.Bucket,
 		grpc:            grpcServer,
 		listen:          listen,
 		users:           opts.Users,
 		streams:         opts.Streams,
 		ms:              opts.MS,
-		gs:              opts.GS,
-		bh:              opts.BH,
+		gs:              gscli,
+		bh:              bh,
 	}
 
 	v1.RegisterMediaServerServiceServer(grpcServer, rpcServer)

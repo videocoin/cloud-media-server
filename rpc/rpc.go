@@ -57,10 +57,12 @@ func (s *Server) Mux(ctx context.Context, req *v1.MuxRequest) (*v1.MuxResponse, 
 	span := opentracing.SpanFromContext(ctx)
 	span.SetTag("stream_id", req.StreamId)
 	span.SetTag("input_url", req.InputUrl)
+	span.SetTag("bucket", s.bucket)
 
 	logger := s.logger.
 		WithField("stream_id", req.StreamId).
-		WithField("input_url", req.InputUrl)
+		WithField("input_url", req.InputUrl).
+		WithField("bucket", s.bucket)
 
 	if req.StreamId == "" || req.InputUrl == "" {
 		return nil, rpc.ErrRpcBadRequest

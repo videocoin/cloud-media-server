@@ -1,8 +1,6 @@
 package service
 
 import (
-	"cloud.google.com/go/storage"
-	"context"
 	"github.com/sirupsen/logrus"
 	streamsv1 "github.com/videocoin/cloud-api/streams/private/v1"
 	usersv1 "github.com/videocoin/cloud-api/users/v1"
@@ -41,26 +39,14 @@ func NewService(cfg *Config) (*Service, error) {
 		return nil, err
 	}
 
-	gscli, err := storage.NewClient(context.Background())
-	if err != nil {
-		return nil, err
-	}
-
-	bh := gscli.Bucket(cfg.Bucket)
-	_, err = bh.Attrs(context.Background())
-	if err != nil {
-		return nil, err
-	}
-
 	rpcConfig := &rpc.ServerOpts{
 		Logger:          cfg.Logger,
 		Addr:            cfg.RPCAddr,
 		AuthTokenSecret: cfg.AuthTokenSecret,
+		Bucket:          cfg.Bucket,
 		Streams:         streams,
 		Users:           users,
 		MS:              mediaServer,
-		GS:              gscli,
-		BH:              bh,
 	}
 
 	rpcServer, err := rpc.NewServer(rpcConfig)
