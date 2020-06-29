@@ -7,6 +7,7 @@ import (
 	"github.com/opentracing/opentracing-go"
 	v1 "github.com/videocoin/cloud-api/mediaserver/v1"
 	"github.com/videocoin/cloud-api/rpc"
+	pstreamsv1 "github.com/videocoin/cloud-api/streams/private/v1"
 	"github.com/videocoin/cloud-media-server/mediacore"
 )
 
@@ -97,8 +98,9 @@ func (s *Server) Mux(ctx context.Context, req *v1.MuxRequest) (*v1.MuxResponse, 
 
 		logger.Info("uploading mux file to bucket")
 
+		emptyCtx := context.Background()
 		_, _, err = mediacore.UploadFileToBucket(
-			context.Background(),
+			emptyCtx,
 			s.bh,
 			req.StreamId,
 			"index.mp4",
@@ -111,6 +113,12 @@ func (s *Server) Mux(ctx context.Context, req *v1.MuxRequest) (*v1.MuxResponse, 
 		}
 
 		logger.Info("upload mux file has been completed")
+
+		_, err = s.streams.Complete(emptyCtx, &pstreamsv1.StreamRequest{Id: req.StreamId})
+		if err != nil {
+			logger.WithError(err).Error("failed to complete stream")
+			return
+		}
 	}()
 
 	return &v1.MuxResponse{}, nil
