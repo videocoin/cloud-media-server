@@ -33,7 +33,7 @@ func MuxToMp4(streamID string, inputURL string) (string, error) {
 }
 
 func UploadFileToBucket(ctx context.Context, bh *storage.BucketHandle, streamID string, filename string, ct string, src *os.File) (*storage.ObjectHandle, *storage.ObjectAttrs, error) {
-	objectName := fmt.Sprintf("%s/%s", filename)
+	objectName := fmt.Sprintf("%s/%s", streamID, filename)
 
 	obj := bh.Object(objectName)
 	w := obj.NewWriter(ctx)
