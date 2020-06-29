@@ -140,11 +140,117 @@ func (m *WebRTCStreamResponse) GetSdp() string {
 func (*WebRTCStreamResponse) XXX_MessageName() string {
 	return "cloud.api.mediaserver.v1.WebRTCStreamResponse"
 }
+
+type MuxRequest struct {
+	StreamId             string   `protobuf:"bytes,1,opt,name=stream_id,json=streamId,proto3" json:"stream_id,omitempty"`
+	InputUrl             string   `protobuf:"bytes,2,opt,name=input_url,json=inputUrl,proto3" json:"input_url,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *MuxRequest) Reset()         { *m = MuxRequest{} }
+func (m *MuxRequest) String() string { return proto.CompactTextString(m) }
+func (*MuxRequest) ProtoMessage()    {}
+func (*MuxRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_87d4b62d2d585b2e, []int{2}
+}
+func (m *MuxRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MuxRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MuxRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MuxRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MuxRequest.Merge(m, src)
+}
+func (m *MuxRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *MuxRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_MuxRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MuxRequest proto.InternalMessageInfo
+
+func (m *MuxRequest) GetStreamId() string {
+	if m != nil {
+		return m.StreamId
+	}
+	return ""
+}
+
+func (m *MuxRequest) GetInputUrl() string {
+	if m != nil {
+		return m.InputUrl
+	}
+	return ""
+}
+
+func (*MuxRequest) XXX_MessageName() string {
+	return "cloud.api.mediaserver.v1.MuxRequest"
+}
+
+type MuxResponse struct {
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *MuxResponse) Reset()         { *m = MuxResponse{} }
+func (m *MuxResponse) String() string { return proto.CompactTextString(m) }
+func (*MuxResponse) ProtoMessage()    {}
+func (*MuxResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_87d4b62d2d585b2e, []int{3}
+}
+func (m *MuxResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MuxResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MuxResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MuxResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MuxResponse.Merge(m, src)
+}
+func (m *MuxResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *MuxResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MuxResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MuxResponse proto.InternalMessageInfo
+
+func (*MuxResponse) XXX_MessageName() string {
+	return "cloud.api.mediaserver.v1.MuxResponse"
+}
 func init() {
 	proto.RegisterType((*StreamRequest)(nil), "cloud.api.mediaserver.v1.StreamRequest")
 	golang_proto.RegisterType((*StreamRequest)(nil), "cloud.api.mediaserver.v1.StreamRequest")
 	proto.RegisterType((*WebRTCStreamResponse)(nil), "cloud.api.mediaserver.v1.WebRTCStreamResponse")
 	golang_proto.RegisterType((*WebRTCStreamResponse)(nil), "cloud.api.mediaserver.v1.WebRTCStreamResponse")
+	proto.RegisterType((*MuxRequest)(nil), "cloud.api.mediaserver.v1.MuxRequest")
+	golang_proto.RegisterType((*MuxRequest)(nil), "cloud.api.mediaserver.v1.MuxRequest")
+	proto.RegisterType((*MuxResponse)(nil), "cloud.api.mediaserver.v1.MuxResponse")
+	golang_proto.RegisterType((*MuxResponse)(nil), "cloud.api.mediaserver.v1.MuxResponse")
 }
 
 func init() {
@@ -155,29 +261,33 @@ func init() {
 }
 
 var fileDescriptor_87d4b62d2d585b2e = []byte{
-	// 344 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x7c, 0x91, 0xc1, 0x4a, 0x33, 0x31,
-	0x10, 0x80, 0x49, 0x7f, 0xf8, 0xb1, 0x0b, 0x82, 0x44, 0xc1, 0xb5, 0xca, 0x2a, 0x8b, 0x60, 0x15,
-	0x4c, 0xa8, 0x7a, 0xea, 0xb1, 0x3d, 0x79, 0xf0, 0xd2, 0x0a, 0x82, 0x97, 0x92, 0xdd, 0x8c, 0x6b,
-	0xa0, 0xbb, 0x49, 0x93, 0xec, 0x8a, 0x57, 0x5f, 0xa1, 0x6f, 0xe1, 0x53, 0x78, 0xec, 0x51, 0xf0,
-	0x2e, 0xd2, 0xfa, 0x04, 0x3e, 0x81, 0x6c, 0xb6, 0x62, 0x05, 0xeb, 0x29, 0x99, 0xcc, 0x97, 0x99,
-	0xcc, 0x17, 0xaf, 0x99, 0x02, 0x17, 0xcc, 0x80, 0x2e, 0x40, 0xd3, 0xa2, 0x45, 0x17, 0xc2, 0x41,
-	0xb9, 0x88, 0x18, 0x88, 0xd2, 0xd2, 0x4a, 0xec, 0xc7, 0x43, 0x99, 0x73, 0xc2, 0x94, 0x20, 0x0b,
-	0x10, 0x29, 0x5a, 0x8d, 0xed, 0x44, 0xca, 0x64, 0x08, 0xd4, 0x71, 0x51, 0x7e, 0x43, 0x21, 0x55,
-	0xf6, 0xbe, 0xba, 0xd6, 0xd8, 0x99, 0x27, 0x99, 0x12, 0x94, 0x65, 0x99, 0xb4, 0xcc, 0x0a, 0x99,
-	0x99, 0x79, 0xf6, 0x38, 0x11, 0xf6, 0x36, 0x8f, 0x48, 0x2c, 0x53, 0x9a, 0xc8, 0x44, 0x7e, 0xd7,
-	0x28, 0x23, 0x17, 0xb8, 0x5d, 0x85, 0x87, 0xca, 0x5b, 0xed, 0x5b, 0x0d, 0x2c, 0xed, 0xc1, 0x28,
-	0x07, 0x63, 0xf1, 0x99, 0x57, 0x37, 0xee, 0x60, 0x20, 0xb8, 0x8f, 0xf6, 0x50, 0xb3, 0xde, 0xd9,
-	0xfc, 0x78, 0xdd, 0x5d, 0x2f, 0xd8, 0x50, 0x70, 0x66, 0xa1, 0x1d, 0x6a, 0x18, 0xe5, 0x42, 0x03,
-	0x0f, 0x7b, 0x2b, 0x15, 0x79, 0xce, 0xf1, 0xa1, 0xf7, 0xcf, 0x70, 0xe5, 0xd7, 0xfe, 0xe6, 0x4b,
-	0x26, 0x6c, 0x7a, 0x1b, 0x57, 0x10, 0xf5, 0x2e, 0xbb, 0x5f, 0x7d, 0x8d, 0x92, 0x99, 0x01, 0xbc,
-	0x56, 0x95, 0x70, 0x2d, 0x1d, 0x79, 0xf2, 0x88, 0x3c, 0x7c, 0x51, 0x8a, 0xe9, 0x3b, 0x31, 0xfd,
-	0x4a, 0x1e, 0x1e, 0x23, 0x0f, 0x77, 0x35, 0x30, 0x0b, 0x8b, 0x75, 0xf0, 0x01, 0x59, 0xa6, 0x93,
-	0xfc, 0x98, 0xb0, 0x41, 0x96, 0x83, 0xbf, 0x3d, 0x2c, 0xdc, 0x7f, 0x78, 0x79, 0x1f, 0xd7, 0x82,
-	0x70, 0xcb, 0x19, 0x2f, 0x7f, 0xd4, 0xd0, 0x6a, 0x70, 0x43, 0xef, 0x20, 0xd2, 0x36, 0x6e, 0xa3,
-	0xa3, 0x8e, 0x3f, 0x99, 0x06, 0xe8, 0x79, 0x1a, 0xa0, 0xb7, 0x69, 0x80, 0x9e, 0x66, 0x01, 0x9a,
-	0xcc, 0x02, 0x74, 0x5d, 0x2b, 0x5a, 0xd1, 0x7f, 0x67, 0xfa, 0xf4, 0x33, 0x00, 0x00, 0xff, 0xff,
-	0x0e, 0x26, 0x7f, 0xc9, 0x19, 0x02, 0x00, 0x00,
+	// 407 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x84, 0x92, 0x4f, 0x8b, 0xd4, 0x30,
+	0x18, 0xc6, 0xcd, 0x2c, 0xc8, 0x4e, 0x64, 0x41, 0xa2, 0x60, 0xed, 0x48, 0x95, 0xb2, 0xe2, 0x28,
+	0x98, 0x30, 0xea, 0x69, 0x8f, 0xbb, 0x20, 0x78, 0x98, 0x4b, 0x67, 0x45, 0xf0, 0x32, 0xa4, 0xed,
+	0x6b, 0x0d, 0xb4, 0x4d, 0x36, 0x7f, 0xea, 0x7a, 0x13, 0xbf, 0xc2, 0x7e, 0x21, 0x8f, 0x7b, 0x14,
+	0xbc, 0x8b, 0xcc, 0xfa, 0x09, 0xfc, 0x04, 0xd2, 0x64, 0x96, 0xa9, 0xe8, 0xb8, 0xa7, 0xf6, 0x4d,
+	0x7e, 0x79, 0x9f, 0x27, 0xcf, 0x1b, 0x3c, 0x6d, 0xa0, 0x14, 0xdc, 0x80, 0xee, 0x40, 0xb3, 0x6e,
+	0xc6, 0x06, 0xe5, 0xb2, 0xff, 0x88, 0x02, 0xa8, 0xd2, 0xd2, 0x4a, 0x12, 0x15, 0xb5, 0x74, 0x25,
+	0xe5, 0x4a, 0xd0, 0x01, 0x44, 0xbb, 0x59, 0x3c, 0xa9, 0xa4, 0xac, 0x6a, 0x60, 0x9e, 0xcb, 0xdd,
+	0x3b, 0x06, 0x8d, 0xb2, 0x1f, 0xc3, 0xb1, 0xf8, 0xde, 0x7a, 0x93, 0x2b, 0xc1, 0x78, 0xdb, 0x4a,
+	0xcb, 0xad, 0x90, 0xad, 0x59, 0xef, 0x3e, 0xad, 0x84, 0x7d, 0xef, 0x72, 0x5a, 0xc8, 0x86, 0x55,
+	0xb2, 0x92, 0x9b, 0x1e, 0x7d, 0xe5, 0x0b, 0xff, 0x17, 0xf0, 0x54, 0xe1, 0xbd, 0x85, 0xd5, 0xc0,
+	0x9b, 0x0c, 0x4e, 0x1c, 0x18, 0x4b, 0x5e, 0xe0, 0xb1, 0xf1, 0x0b, 0x4b, 0x51, 0x46, 0xe8, 0x01,
+	0x9a, 0x8e, 0x0f, 0xef, 0xfc, 0xfa, 0x7e, 0xff, 0x56, 0xc7, 0x6b, 0x51, 0x72, 0x0b, 0x07, 0xa9,
+	0x86, 0x13, 0x27, 0x34, 0x94, 0x69, 0xb6, 0x1b, 0xc8, 0x57, 0x25, 0x79, 0x8c, 0x77, 0x4c, 0xa9,
+	0xa2, 0xd1, 0xff, 0xf9, 0x9e, 0x49, 0xa7, 0xf8, 0xf6, 0x1b, 0xc8, 0xb3, 0xe3, 0xa3, 0x4b, 0x5d,
+	0xa3, 0x64, 0x6b, 0x80, 0xdc, 0x0c, 0x2d, 0xbc, 0x64, 0x20, 0x5f, 0x62, 0x3c, 0x77, 0xa7, 0x97,
+	0xc6, 0x26, 0x7f, 0x19, 0x1b, 0xe8, 0x4f, 0xf0, 0x58, 0xb4, 0xca, 0xd9, 0xa5, 0xd3, 0x75, 0x70,
+	0x91, 0xed, 0xfa, 0x85, 0xd7, 0xba, 0x4e, 0xf7, 0xf0, 0x0d, 0xdf, 0x27, 0x08, 0x3d, 0xfb, 0x34,
+	0xc2, 0x64, 0xde, 0xe7, 0xbd, 0xf0, 0x79, 0x2f, 0xc2, 0x4c, 0xc8, 0x19, 0xc2, 0xe4, 0x48, 0x03,
+	0xb7, 0x30, 0xb4, 0x47, 0x1e, 0xd1, 0x6d, 0x53, 0xa2, 0x7f, 0x04, 0x17, 0xd3, 0xed, 0xe0, 0xbf,
+	0xee, 0x9b, 0xee, 0x7f, 0xfe, 0xf6, 0xf3, 0x6c, 0x94, 0xa4, 0x77, 0xfd, 0x20, 0xfb, 0x87, 0x62,
+	0x58, 0xb8, 0x8f, 0x61, 0x1f, 0x20, 0xd7, 0xb6, 0x38, 0x40, 0x4f, 0xc8, 0x31, 0xde, 0x99, 0xbb,
+	0x53, 0xb2, 0xbf, 0xbd, 0xf9, 0x26, 0xa2, 0xf8, 0xe1, 0x15, 0xd4, 0x5a, 0xf9, 0xda, 0x61, 0x74,
+	0xbe, 0x4a, 0xd0, 0xd7, 0x55, 0x82, 0x7e, 0xac, 0x12, 0xf4, 0xe5, 0x22, 0x41, 0xe7, 0x17, 0x09,
+	0x7a, 0x3b, 0xea, 0x66, 0xf9, 0x75, 0xff, 0x2c, 0x9e, 0xff, 0x0e, 0x00, 0x00, 0xff, 0xff, 0x4b,
+	0xee, 0x98, 0x21, 0xc6, 0x02, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -193,6 +303,7 @@ const _ = grpc.SupportPackageIsVersion4
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type MediaServerServiceClient interface {
 	CreateWebRTCStream(ctx context.Context, in *StreamRequest, opts ...grpc.CallOption) (*WebRTCStreamResponse, error)
+	Mux(ctx context.Context, in *MuxRequest, opts ...grpc.CallOption) (*MuxResponse, error)
 }
 
 type mediaServerServiceClient struct {
@@ -212,9 +323,19 @@ func (c *mediaServerServiceClient) CreateWebRTCStream(ctx context.Context, in *S
 	return out, nil
 }
 
+func (c *mediaServerServiceClient) Mux(ctx context.Context, in *MuxRequest, opts ...grpc.CallOption) (*MuxResponse, error) {
+	out := new(MuxResponse)
+	err := c.cc.Invoke(ctx, "/cloud.api.mediaserver.v1.MediaServerService/Mux", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MediaServerServiceServer is the server API for MediaServerService service.
 type MediaServerServiceServer interface {
 	CreateWebRTCStream(context.Context, *StreamRequest) (*WebRTCStreamResponse, error)
+	Mux(context.Context, *MuxRequest) (*MuxResponse, error)
 }
 
 // UnimplementedMediaServerServiceServer can be embedded to have forward compatible implementations.
@@ -223,6 +344,9 @@ type UnimplementedMediaServerServiceServer struct {
 
 func (*UnimplementedMediaServerServiceServer) CreateWebRTCStream(ctx context.Context, req *StreamRequest) (*WebRTCStreamResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateWebRTCStream not implemented")
+}
+func (*UnimplementedMediaServerServiceServer) Mux(ctx context.Context, req *MuxRequest) (*MuxResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Mux not implemented")
 }
 
 func RegisterMediaServerServiceServer(s *grpc.Server, srv MediaServerServiceServer) {
@@ -247,6 +371,24 @@ func _MediaServerService_CreateWebRTCStream_Handler(srv interface{}, ctx context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _MediaServerService_Mux_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MuxRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MediaServerServiceServer).Mux(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/cloud.api.mediaserver.v1.MediaServerService/Mux",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MediaServerServiceServer).Mux(ctx, req.(*MuxRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _MediaServerService_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "cloud.api.mediaserver.v1.MediaServerService",
 	HandlerType: (*MediaServerServiceServer)(nil),
@@ -254,6 +396,10 @@ var _MediaServerService_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateWebRTCStream",
 			Handler:    _MediaServerService_CreateWebRTCStream_Handler,
+		},
+		{
+			MethodName: "Mux",
+			Handler:    _MediaServerService_Mux_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -335,6 +481,74 @@ func (m *WebRTCStreamResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
+func (m *MuxRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MuxRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MuxRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
+	}
+	if len(m.InputUrl) > 0 {
+		i -= len(m.InputUrl)
+		copy(dAtA[i:], m.InputUrl)
+		i = encodeVarintMediaserverService(dAtA, i, uint64(len(m.InputUrl)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.StreamId) > 0 {
+		i -= len(m.StreamId)
+		copy(dAtA[i:], m.StreamId)
+		i = encodeVarintMediaserverService(dAtA, i, uint64(len(m.StreamId)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *MuxResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MuxResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MuxResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
+	}
+	return len(dAtA) - i, nil
+}
+
 func encodeVarintMediaserverService(dAtA []byte, offset int, v uint64) int {
 	offset -= sovMediaserverService(v)
 	base := offset
@@ -376,6 +590,38 @@ func (m *WebRTCStreamResponse) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovMediaserverService(uint64(l))
 	}
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
+	}
+	return n
+}
+
+func (m *MuxRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.StreamId)
+	if l > 0 {
+		n += 1 + l + sovMediaserverService(uint64(l))
+	}
+	l = len(m.InputUrl)
+	if l > 0 {
+		n += 1 + l + sovMediaserverService(uint64(l))
+	}
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
+	}
+	return n
+}
+
+func (m *MuxResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
 	if m.XXX_unrecognized != nil {
 		n += len(m.XXX_unrecognized)
 	}
@@ -567,6 +813,178 @@ func (m *WebRTCStreamResponse) Unmarshal(dAtA []byte) error {
 			}
 			m.Sdp = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipMediaserverService(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthMediaserverService
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthMediaserverService
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MuxRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowMediaserverService
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MuxRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MuxRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field StreamId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMediaserverService
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthMediaserverService
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthMediaserverService
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.StreamId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field InputUrl", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMediaserverService
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthMediaserverService
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthMediaserverService
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.InputUrl = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipMediaserverService(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthMediaserverService
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthMediaserverService
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MuxResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowMediaserverService
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MuxResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MuxResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
 		default:
 			iNdEx = preIndex
 			skippy, err := skipMediaserverService(dAtA[iNdEx:])
