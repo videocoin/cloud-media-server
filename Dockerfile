@@ -8,7 +8,7 @@ ADD ./ ./
 
 RUN make build
 
-FROM jrottenberg/ffmpeg:4.1-ubuntu
+FROM jrottenberg/ffmpeg:4.3-ubuntu1804
 
 RUN apt-get update
 RUN apt-get install -y ca-certificates \
@@ -32,4 +32,4 @@ COPY --from=builder /go/src/github.com/videocoin/cloud-media-server/bin/mediaser
 
 WORKDIR /
 
-CMD ["/mediaserver"]
+ENTRYPOINT ["/mediaserver"]
