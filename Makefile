@@ -1,7 +1,7 @@
 GOOS?=linux
 GOARCH?=amd64
 
-GCP_PROJECT=videocoin-network
+GCP_PROJECT?=videocoin-network
 ENV?=dev
 
 NAME=mediaserver
