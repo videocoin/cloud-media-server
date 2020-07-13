@@ -56,22 +56,32 @@ func (s *Server) CreateWebRTCStream(ctx context.Context, req *v1.StreamRequest) 
 func (s *Server) Mux(ctx context.Context, req *v1.MuxRequest) (*v1.MuxResponse, error) {
 	span := opentracing.SpanFromContext(ctx)
 	span.SetTag("stream_id", req.StreamId)
-	span.SetTag("input_url", req.InputUrl)
 	span.SetTag("bucket", s.bucket)
 
 	logger := s.logger.
 		WithField("stream_id", req.StreamId).
-		WithField("input_url", req.InputUrl).
 		WithField("bucket", s.bucket)
 
-	if req.StreamId == "" || req.InputUrl == "" {
+	if req.StreamId == "" {
 		return nil, rpc.ErrRpcBadRequest
 	}
 
 	go func() {
+		logger.Info("getting stream")
+
+		streamReq := &pstreamsv1.StreamRequest{}
+		streamResp, err := s.streams.Get(context.Background(), streamReq)
+		if err != nil {
+			logger.WithError(err).Error("failed to get stream")
+			return
+		}
+
+		span.SetTag("input_url", streamResp.OutputURL)
+		logger = logger.WithField("input_url", streamResp.OutputURL)
+
 		logger.Info("muxing")
 
-		outPath, err := mediacore.MuxToMp4(req.StreamId, req.InputUrl)
+		outPath, err := mediacore.MuxToMp4(req.StreamId, streamResp.OutputURL)
 		if err != nil {
 			logger.WithError(err).Error("failed to mux to file")
 			return
