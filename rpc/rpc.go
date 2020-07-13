@@ -3,6 +3,7 @@ package rpc
 import (
 	"context"
 	"os"
+	"strings"
 
 	"github.com/opentracing/opentracing-go"
 	v1 "github.com/videocoin/cloud-api/mediaserver/v1"
@@ -76,12 +77,14 @@ func (s *Server) Mux(ctx context.Context, req *v1.MuxRequest) (*v1.MuxResponse, 
 			return
 		}
 
-		span.SetTag("input_url", streamResp.OutputURL)
-		logger = logger.WithField("input_url", streamResp.OutputURL)
+		inputURL := strings.Replace(streamResp.OutputURL, "/index.mp4", "/index.m3u8", -1)
+
+		span.SetTag("input_url", inputURL)
+		logger = logger.WithField("input_url", inputURL)
 
 		logger.Info("muxing")
 
-		outPath, err := mediacore.MuxToMp4(req.StreamId, streamResp.OutputURL)
+		outPath, err := mediacore.MuxToMp4(req.StreamId, inputURL)
 		if err != nil {
 			logger.WithError(err).Error("failed to mux to file")
 			return
