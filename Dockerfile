@@ -10,7 +10,9 @@ RUN make build
 
 FROM jrottenberg/ffmpeg:4.3-ubuntu1804
 
-RUN apt-get update
+ENV LD_LIBRARY_PATH=/usr/local/lib:/usr/local/lib64:/usr/lib:/usr/lib64:/lib:/lib64:/lib/x86_64-linux-gnu
+
+RUN apt-get update --fix-missing
 RUN apt-get install -y ca-certificates \
     libgstreamer-plugins-base1.0-dev \
     libgstreamer1.0-0 \

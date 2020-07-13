@@ -69,7 +69,7 @@ func (s *Server) Mux(ctx context.Context, req *v1.MuxRequest) (*v1.MuxResponse, 
 	go func() {
 		logger.Info("getting stream")
 
-		streamReq := &pstreamsv1.StreamRequest{}
+		streamReq := &pstreamsv1.StreamRequest{Id: req.StreamId}
 		streamResp, err := s.streams.Get(context.Background(), streamReq)
 		if err != nil {
 			logger.WithError(err).Error("failed to get stream")
