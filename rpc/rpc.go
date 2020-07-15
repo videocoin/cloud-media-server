@@ -2,14 +2,13 @@ package rpc
 
 import (
 	"context"
+	pstreamsv1 "github.com/videocoin/cloud-api/streams/private/v1"
+	"github.com/videocoin/mediaserver/mediacore"
 	"os"
-	"strings"
 
 	"github.com/opentracing/opentracing-go"
 	v1 "github.com/videocoin/cloud-api/mediaserver/v1"
 	"github.com/videocoin/cloud-api/rpc"
-	pstreamsv1 "github.com/videocoin/cloud-api/streams/private/v1"
-	"github.com/videocoin/cloud-media-server/mediacore"
 )
 
 func (s *Server) CreateWebRTCStream(ctx context.Context, req *v1.StreamRequest) (*v1.WebRTCStreamResponse, error) {
@@ -34,7 +33,7 @@ func (s *Server) CreateWebRTCStream(ctx context.Context, req *v1.StreamRequest) 
 		return nil, rpc.NewRpcValidationError(verr)
 	}
 
-	sdpStream, inStream, sdpAnswer, err := s.ms.CreateWebRTCStream(req.Sdp)
+	sdpStream, inStream, sdpAnswer, err := s.webRtcStreamer.CreateStream(req.Sdp)
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +41,7 @@ func (s *Server) CreateWebRTCStream(ctx context.Context, req *v1.StreamRequest) 
 	logger.Debugf("sdpStream %+v", sdpStream)
 	logger.Debugf("incomingStream %+v", inStream)
 
-	err = s.ms.StartWebRTCStreaming(req.StreamId, sdpStream, inStream)
+	err = s.webRtcStreamer.StartStreaming(req.StreamId, sdpStream, inStream)
 	if err != nil {
 		return nil, err
 	}
@@ -57,34 +56,22 @@ func (s *Server) CreateWebRTCStream(ctx context.Context, req *v1.StreamRequest) 
 func (s *Server) Mux(ctx context.Context, req *v1.MuxRequest) (*v1.MuxResponse, error) {
 	span := opentracing.SpanFromContext(ctx)
 	span.SetTag("stream_id", req.StreamId)
+	span.SetTag("input_url", req.InputUrl)
 	span.SetTag("bucket", s.bucket)
 
 	logger := s.logger.
 		WithField("stream_id", req.StreamId).
+		WithField("input_url", req.InputUrl).
 		WithField("bucket", s.bucket)
 
-	if req.StreamId == "" {
+	if req.StreamId == "" || req.InputUrl == "" {
 		return nil, rpc.ErrRpcBadRequest
 	}
 
 	go func() {
-		logger.Info("getting stream")
-
-		streamReq := &pstreamsv1.StreamRequest{Id: req.StreamId}
-		streamResp, err := s.streams.Get(context.Background(), streamReq)
-		if err != nil {
-			logger.WithError(err).Error("failed to get stream")
-			return
-		}
-
-		inputURL := strings.Replace(streamResp.OutputURL, "/index.mp4", "/index.m3u8", -1)
-
-		span.SetTag("input_url", inputURL)
-		logger = logger.WithField("input_url", inputURL)
-
 		logger.Info("muxing")
 
-		outPath, err := mediacore.MuxToMp4(req.StreamId, inputURL)
+		outPath, err := mediacore.MuxToMp4(req.StreamId, req.InputUrl)
 		if err != nil {
 			logger.WithError(err).Error("failed to mux to file")
 			return
@@ -129,7 +116,7 @@ func (s *Server) Mux(ctx context.Context, req *v1.MuxRequest) (*v1.MuxResponse, 
 
 		logger.Info("upload mux file has been completed")
 
-		_, err = s.streams.Complete(emptyCtx, &pstreamsv1.StreamRequest{Id: req.StreamId})
+		_, err = s.sc.Streams.Complete(emptyCtx, &pstreamsv1.StreamRequest{Id: req.StreamId})
 		if err != nil {
 			logger.WithError(err).Error("failed to complete stream")
 			return

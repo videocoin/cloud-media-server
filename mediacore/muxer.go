@@ -17,21 +17,7 @@ const (
 func MuxToMp4(streamID string, inputURL string) (string, error) {
 	outputPath := fmt.Sprintf("/tmp/mux_%s.mp4", streamID)
 
-	execArgs := []string{
-		"-i",
-		inputURL,
-		"-c:v",
-		"copy",
-		"-c:a",
-		"copy",
-		"-map",
-		"0:v",
-		"-map",
-		"0:a",
-		"-f",
-		"mp4",
-		outputPath,
-	}
+	execArgs := []string{"-i", inputURL, "-c:v", "copy", "-c:a", "copy", "-f", "mp4", outputPath}
 	cmd := exec.Command("ffmpeg", execArgs...)
 
 	cmdOut, err := cmd.Output()

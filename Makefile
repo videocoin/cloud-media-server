@@ -25,10 +25,8 @@ build:
 
 deps:
 	GO111MODULE=on go mod vendor
-	cp -r $(GOPATH)/src/github.com/notedit/media-server-go/wrapper \
-	vendor/github.com/notedit/media-server-go/wrapper
-	cp -r $(GOPATH)/src/github.com/notedit/media-server-go/include \
-	vendor/github.com/notedit/media-server-go/include
+	cp -r ${GOPATH}/src/github.com/notedit/media-server-go/wrapper ./vendor/github.com/notedit/media-server-go
+	cp -r ${GOPATH}/src/github.com/notedit/media-server-go/include ./vendor/github.com/notedit/media-server-go
 
 lint:
 	golangci-lint run -v
@@ -39,10 +37,10 @@ docker-lint:
 	docker build -f Dockerfile.lint .
 
 docker-build-base:
-	docker build -t gcr.io/${GCP_PROJECT}/mediaserver-go:${VERSION} -f Dockerfile.base .
+	docker build -t ${REGISTRY_SERVER}/${REGISTRY_PROJECT}/mediaserver-base:v0.1 -f Dockerfile.base .
 
 docker-push-base:
-	docker push gcr.io/${GCP_PROJECT}/mediaserver-go:${VERSION}
+	docker push ${REGISTRY_SERVER}/${REGISTRY_PROJECT}/mediaserver-base:v0.1
 
 docker-build:
 	docker build -t ${REGISTRY_SERVER}/${REGISTRY_PROJECT}/${NAME}:${VERSION} -f Dockerfile .

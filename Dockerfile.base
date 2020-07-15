@@ -1,46 +1,104 @@
-FROM ubuntu:18.04 as builder
+FROM jrottenberg/ffmpeg:4.3-ubuntu1804
 
-LABEL maintainer="Videocoin" description="webrtc to rtmp streamer"
+ARG NGINX_VERSION=1.13.6
+ARG NGINX_URL=https://github.com/nginx/nginx/archive
+ARG NGINX_RTMP_MODULE_VERSION=1.1.7.16
+ARG NGINX_RTMP_MODULE_URL=https://github.com/reality-lab-networks/nginx-rtmp-module/archive
 
-RUN apt-get update
-RUN apt-get install -y --no-install-recommends dh-autoreconf sudo g++-7 git ca-certificates
-RUN update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 90
+ENV LD_LIBRARY_PATH=/usr/local/lib:/usr/local/lib64:/usr/lib:/usr/lib64:/lib:/lib64:/lib/x86_64-linux-gnu
 
-WORKDIR /go/src/github.com/videocoin
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        software-properties-common && \
+    add-apt-repository -y ppa:longsleep/golang-backports && \
+    add-apt-repository -y ppa:ubuntu-toolchain-r/test && \
+    apt-get update -qq && \
+    apt-get install -y --no-install-recommends \
+        git \
+        wget \
+        sudo \
+        dh-autoreconf \
+        ca-certificates \
+        g++-7 \
+        build-essential \
+        autoconf \
+        libtool \
+        automake \
+        golang-go \
+        dos2unix \
+        mercurial \
+        libreadline-dev \
+        libncurses5-dev \
+        libpcre3-dev \
+        libssl-dev \
+        perl \
+        musl \
+        wget \
+        openssl \
+        bzip2 \
+        libtbb-dev \
+        curl \
+        libgstreamer-plugins-base1.0-dev \
+        libgstreamer1.0-0 \
+        gstreamer1.0-plugins-base \
+        gstreamer1.0-plugins-good \
+        gstreamer1.0-plugins-bad \
+        gstreamer1.0-plugins-ugly \
+        gstreamer1.0-libav \
+        gstreamer1.0-tools \
+        gstreamer1.0-x \
+        gstreamer1.0-pulseaudio \
+        opus-tools \
+        libogg0 \
+        libopus0 \
+        libopus-dev \
+        libopusfile-dev && \
+    update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 90 && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN go env
+
+# nginx-rtmp
+
+WORKDIR /usr/local/nginx-rtmp
+
+ADD ./deploy/nginx-rtmp ./
+
+# Download and decompress Nginx
+RUN mkdir -p /tmp/build/nginx
+RUN wget --quiet -O /tmp/build/nginx-${NGINX_VERSION}.tar.gz ${NGINX_URL}/release-${NGINX_VERSION}.tar.gz
+RUN tar -C /tmp/build/nginx -zxvf /tmp/build/nginx-${NGINX_VERSION}.tar.gz
+RUN rm /tmp/build/nginx-${NGINX_VERSION}.tar.gz
+RUN ls /tmp/build/nginx
+
+# Download and decompress RTMP module
+RUN mkdir -p /tmp/build/nginx-rtmp-module
+RUN wget --quiet -O /tmp/build/nginx-rtmp-module/nginx-rtmp-module-${NGINX_RTMP_MODULE_VERSION}.tar.gz ${NGINX_RTMP_MODULE_URL}/v${NGINX_RTMP_MODULE_VERSION}.tar.gz
+RUN tar -C /tmp/build/nginx-rtmp-module -zxf /tmp/build/nginx-rtmp-module/nginx-rtmp-module-${NGINX_RTMP_MODULE_VERSION}.tar.gz
+RUN rm /tmp/build/nginx-rtmp-module/nginx-rtmp-module-${NGINX_RTMP_MODULE_VERSION}.tar.gz
+
+# Build nginx
+RUN cd /tmp/build/nginx/nginx-release-${NGINX_VERSION} && \
+    auto/configure --prefix=/usr/local/nginx-rtmp --with-debug --with-http_ssl_module --add-module=/tmp/build/nginx-rtmp-module/nginx-rtmp-module-${NGINX_RTMP_MODULE_VERSION} && \
+    make && \
+    make install
+
+RUN mkdir -p /data/records /var/log/nginx-rtmp
+RUN chown www-data /data/records /var/log/nginx-rtmp
+RUN mkdir -p /var/log/nginx-rtmp
+ENV PATH="/usr/local/nginx-rtmp/sbin/:${PATH}"
+
+WORKDIR /go/src/github.com/notedit
 
 RUN git clone --recurse-submodules https://github.com/notedit/media-server-go-native.git
+RUN git clone --branch v0.1.14 https://github.com/notedit/media-server-go.git
 
-WORKDIR /go/src/github.com/videocoin/media-server-go-native
+WORKDIR /go/src/github.com/notedit/media-server-go-native
 
-RUN make ssl 
-RUN make srtp 
+RUN make ssl
+RUN make srtp
 RUN make mp4
 RUN make mediaserver
 
-WORKDIR /go/src/github.com/videocoin
-
-RUN apt-get install -y software-properties-common
-RUN add-apt-repository ppa:longsleep/golang-backports
-RUN apt-get update
-RUN apt-get install -y golang-go
-
-RUN git clone https://github.com/notedit/media-server-go.git
-
-WORKDIR /go/src/github.com/videocoin/media-server-go
-
-RUN apt-get install -y \
-    libgstreamer-plugins-base1.0-dev \
-    libgstreamer1.0-0 \
-    gstreamer1.0-plugins-base \
-    gstreamer1.0-plugins-good \
-    gstreamer1.0-plugins-bad \
-    gstreamer1.0-plugins-ugly \
-    gstreamer1.0-libav \
-    gstreamer1.0-tools \
-    gstreamer1.0-x \
-    gstreamer1.0-pulseaudio \
-    opus-tools \
-    libogg0 \
-    libopus0 \
-    libopus-dev \
-    libopusfile-dev
+WORKDIR /go/src/github.com/notedit/media-server-go
+RUN go build

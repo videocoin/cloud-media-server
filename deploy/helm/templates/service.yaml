@@ -12,24 +12,53 @@ spec:
       targetPort: {{ .Values.service.ports.grpc }}
       protocol: TCP
       name: grpc
+    - port: {{ .Values.service.ports.restapi }}
+      targetPort: {{ .Values.service.ports.restapi }}
+      protocol: TCP
+      name: restapi
+    - port: {{ .Values.service.ports.http }}
+      targetPort: {{ .Values.service.ports.http }}
+      protocol: TCP
+      name: http
   selector:
     app: {{ .Chart.Name }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: "{{ .Chart.Name }}-lb"
+  name: "{{ .Chart.Name }}-webrtc-lb"
   labels:
     app: {{ .Chart.Name }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     heritage: "{{ .Release.Service }}"
 spec:
   type: LoadBalancer
-  loadBalancerIP: {{ .Values.service.loadBalancerIP }}
+  loadBalancerIP: {{ .Values.service.loadBalancerIP.webrtc }}
   ports:
   - port: {{ .Values.service.ports.ms }}
     targetPort: {{ .Values.service.ports.ms }}
     name: mslb
     protocol: UDP
+  selector:
+    app: {{ .Chart.Name }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ .Chart.Name }}-rtmp-lb"
+  labels:
+    app: {{ .Chart.Name }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  type: LoadBalancer
+  loadBalancerIP: {{ .Values.service.loadBalancerIP.rtmp }}
+  ports:
+    - port: {{ .Values.service.ports.rtmp }}
+      targetPort: {{ .Values.service.ports.rtmp }}
+      name: rtmp
+    - port: {{ .Values.service.ports.http }}
+      targetPort: {{ .Values.service.ports.http }}
+      name: http
   selector:
     app: {{ .Chart.Name }}

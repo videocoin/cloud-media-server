@@ -28,14 +28,18 @@ spec:
       serviceAccountName: {{ .Values.serviceAccount.name }}
       automountServiceAccountToken: true
       containers:
-        - name: {{ .Release.Name }}
+        - name: mediaserver
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command: ["bash", "-c", "source /vault/secrets/common && source /vault/secrets/config && /mediaserver"]
+          command: ["bash", "-c", "source /vault/secrets/common && source /vault/secrets/config && mkdir -p /data/studio/hls && chown www-data:www-data /data/studio/hls && /mediaserver-linux-amd64"]
           ports:
             - containerPort: {{ .Values.service.ports.grpc }}
+            - containerPort: {{ .Values.service.ports.restapi }}
             - containerPort: {{ .Values.service.ports.ms }}
               protocol: UDP
+          volumeMounts:
+            - mountPath: /data/studio
+              name: {{ .Chart.Name }}-fs
           env:
             - name: JAEGER_AGENT_HOST
               valueFrom:
@@ -46,6 +50,24 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ .Chart.Name }}
+        - name: nginx-rtmp
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["/usr/local/nginx-rtmp/sbin/nginx", "-c", "/usr/local/nginx-rtmp/etc/stream-ingester-rtmp.conf", "-g", "daemon off;"]
+          ports:
+            - containerPort: {{ .Values.service.ports.rtmp }}
+          volumeMounts:
+            - mountPath: /data/studio
+              name: {{ .Chart.Name }}-fs
+        - name: nginx-http
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["/usr/local/nginx-rtmp/sbin/nginx", "-c", "/usr/local/nginx-rtmp/etc/stream-ingester-http.conf", "-g", "daemon off;"]
+          ports:
+            - containerPort: {{ .Values.service.ports.http }}
+          volumeMounts:
+            - mountPath: /data/studio
+              name: {{ .Chart.Name }}-fs
           {{- if .Values.resources }}
           resources:
 {{ toYaml .Values.resources | indent 12 }}
@@ -54,6 +76,10 @@ spec:
         - name: config
           configMap:
             name: {{ .Release.Name }}
+        - name: {{ .Chart.Name }}-fs
+          persistentVolumeClaim:
+            claimName: {{ .Chart.Name }}-fs
+            readOnly: false
     {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

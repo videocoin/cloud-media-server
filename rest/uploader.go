@@ -1,0 +1,199 @@
+package rest
+
+import (
+	"context"
+	"fmt"
+	"github.com/labstack/echo/v4"
+	pstreamsv1 "github.com/videocoin/cloud-api/streams/private/v1"
+	streamsv1 "github.com/videocoin/cloud-api/streams/v1"
+	"github.com/videocoin/mediaserver/downloader"
+	"github.com/videocoin/mediaserver/mediacore/splitter"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+	"io"
+	"net/http"
+	"os"
+	"path"
+)
+
+const (
+	MIMEVideoMP4       = "video/mp4"
+	MIMEVideoQuickTime = "video/quicktime"
+)
+
+func (s *Server) validateUpload(ctx context.Context, streamID, userID string, checkStreamStatus bool) (*echo.HTTPError, error) {
+	req := &pstreamsv1.StreamRequest{Id: streamID}
+	stream, err := s.sc.Streams.Get(ctx, req)
+	if err != nil {
+		if s, ok := status.FromError(err); ok {
+			if s.Code() == codes.NotFound {
+				return echo.ErrNotFound, err
+			}
+		}
+
+		return echo.ErrInternalServerError, err
+	}
+
+	if stream.UserID != userID {
+		return nil, echo.ErrNotFound
+	}
+
+	if checkStreamStatus {
+		if stream.Status != streamsv1.StreamStatusPrepared {
+			return echo.NewHTTPError(http.StatusBadRequest, "Stream isn't prepeared"),
+				fmt.Errorf("wrong stream status: %s", stream.Status.String())
+		}
+	}
+
+	return nil, nil
+}
+
+func (s *Server) uploadFromFile(c echo.Context) error {
+	streamID := c.Param("id")
+
+	logger := s.logger.WithField("stream_id", streamID)
+
+	userID, err := s.authenticate(c)
+	if err != nil {
+		logger.WithError(err).Warningf("failed to auth")
+		return err
+	}
+
+	httpErr, err := s.validateUpload(c.Request().Context(), streamID, userID, true)
+	if httpErr != nil {
+		if err != nil {
+			logger.WithError(err).Error("failed to validate")
+		}
+		return httpErr
+	}
+
+	f, err := c.FormFile("file")
+	if err != nil {
+		logger.Errorf("failed to form file: %s", err)
+		return err
+	}
+
+	src, err := f.Open()
+	if err != nil {
+		logger.Errorf("failed to file open: %s", err)
+		return err
+	}
+	defer src.Close()
+
+	dstPath := fmt.Sprintf("%s/%s/%s", s.downloader.Dst(), streamID, f.Filename)
+	dstFolder := path.Dir(dstPath)
+
+	_, err = os.Stat(dstFolder)
+	if err != nil {
+		if !os.IsNotExist(err) {
+			logger.WithError(err).Error("failed to stat destination folder")
+			return echo.ErrInternalServerError
+		}
+
+		mkdirErr := os.MkdirAll(dstFolder, 0777)
+		if mkdirErr != nil {
+			logger.WithError(mkdirErr).Error("failed to create destination folder")
+			return echo.ErrInternalServerError
+		}
+	}
+
+	dst, err := os.Create(dstPath)
+	if err != nil {
+		logger.WithError(err).Error("failed to create destination file")
+		return echo.ErrInternalServerError
+	}
+	defer dst.Close()
+
+	logger.Info("uploading")
+
+	if _, err = io.Copy(dst, src); err != nil {
+		return err
+	}
+
+	if s.splitter != nil {
+		mediaFile := &splitter.MediaFile{
+			StreamID: streamID,
+			Path:     dstPath,
+		}
+
+		go func(mf *splitter.MediaFile) {
+			s.splitter.InputCh <- mf
+		}(mediaFile)
+	}
+
+	return c.NoContent(http.StatusCreated)
+}
+
+func (s *Server) getUploadInfo(c echo.Context) error {
+	streamID := c.Param("id")
+
+	logger := s.logger.WithField("stream_id", streamID)
+
+	userID, err := s.authenticate(c)
+	if err != nil {
+		logger.WithError(err).Warningf("failed to auth")
+		return err
+	}
+
+	httpErr, err := s.validateUpload(c.Request().Context(), streamID, userID, false)
+	if httpErr != nil {
+		if err != nil {
+			logger.WithError(err).Error("failed to validate")
+		}
+		return httpErr
+	}
+
+	resp := &progressResponse{Progress: 0}
+
+	if s.ds != nil {
+		meta, err := s.ds.GetFileMeta(c.Request().Context(), streamID)
+		if err != nil {
+			logger.WithError(err).Error("failed to get file meta")
+		}
+		if meta != nil {
+			f, err := os.Stat(meta.Path)
+			if err == nil && meta.Size != 0 {
+				resp.Progress = f.Size() * 100 / meta.Size
+			}
+		}
+	}
+
+	return c.JSON(http.StatusOK, resp)
+}
+
+func (s *Server) uploadFromURL(c echo.Context) error {
+	streamID := c.Param("id")
+
+	logger := s.logger.WithField("stream_id", streamID)
+
+	userID, err := s.authenticate(c)
+	if err != nil {
+		logger.WithError(err).Warningf("failed to auth")
+		return err
+	}
+
+	err, httpErr := s.validateUpload(c.Request().Context(), streamID, userID, true)
+	if httpErr != nil {
+		if err != nil {
+			logger.WithError(err).Error("failed to validate")
+		}
+		return httpErr
+	}
+
+	reqData := new(requestData)
+	err = c.Bind(reqData)
+	if err != nil {
+		logger.WithError(err).Error("failed to bind data")
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid data")
+	}
+
+	logger = logger.WithField("url", reqData.URL)
+	logger.Info("uploading from url")
+
+	s.downloader.InputCh <- &downloader.InputFile{
+		StreamID: streamID,
+		URL:      reqData.URL,
+	}
+
+	return c.NoContent(http.StatusCreated)
+}

@@ -14,28 +14,28 @@ serviceAccount:
 config:
   USERS_RPC_ADDR: "users.console.svc.cluster.local:5000"
   STREAMS_RPC_ADDR: "streams.console.svc.cluster.local:5102"
-  MEDIASERVER_HOST: "34.66.65.9"
-  MEDIASERVER_PORT: "6000"
+  DISPATCHER_RPC_ADDR: "dispatcher.console.svc.cluster.local:5008"
+  WEBRTC_SERVER_HOST: "34.66.65.9"
+  WEBRTC_SERVER_PORT: "6000"
+  RTMP_URL: "rtmp://127.0.0.1:1935/live"
+  DATA_DIR: "/data/studio/hls"
 
 service:
-  loadBalancerIP: "34.66.65.9"
+  loadBalancerIP:
+    webrtc: "34.66.65.9"
+    rtmp: "146.148.85.25"
   ports:
     grpc: 5090
     ms: 6000
+    rtmp: 1935
+    restapi: 8090
+    http: 80
 
 autoscaler:
   minCount: 1
-  maxCount: 10
+  maxCount: 5
   targets:
     targetCPUUtilizationPercentage: 70
-
-ingress:
-  enabled: false
-  host: ms.dev.videocoinapis.com
-  annotations:
-    cert-manager.io/cluster-issuer: letsencrypt-dns-prod
-    kubernetes.io/ingress.class: nginx
-  secret: tls-cert-console-mediaserver
 
 annotations:
   vault.hashicorp.com/agent-inject: "true"

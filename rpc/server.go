@@ -1,30 +1,27 @@
 package rpc
 
 import (
-	"context"
-	"net"
-
 	"cloud.google.com/go/storage"
+	"context"
+	"github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus/ctxlogrus"
 	"github.com/sirupsen/logrus"
+	clientv1 "github.com/videocoin/cloud-api/client/v1"
 	v1 "github.com/videocoin/cloud-api/mediaserver/v1"
-	streamsv1 "github.com/videocoin/cloud-api/streams/private/v1"
-	usersv1 "github.com/videocoin/cloud-api/users/v1"
-	"github.com/videocoin/cloud-media-server/mediacore"
 	"github.com/videocoin/cloud-pkg/grpcutil"
+	"github.com/videocoin/mediaserver/mediacore/webrtc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
 	healthv1 "google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
+	"net"
 )
 
 type ServerOpts struct {
-	Logger          *logrus.Entry
 	Addr            string
 	AuthTokenSecret string
 	Bucket          string
-	Users           usersv1.UserServiceClient
-	Streams         streamsv1.StreamsServiceClient
-	MS              *mediacore.MediaServer
+	SC              *clientv1.ServiceClient
+	WebRTCStreamer  *webrtc.Streamer
 }
 
 type Server struct {
@@ -34,16 +31,14 @@ type Server struct {
 	bucket          string
 	grpc            *grpc.Server
 	listen          net.Listener
-	users           usersv1.UserServiceClient
-	streams         streamsv1.StreamsServiceClient
 	validator       *requestValidator
-	ms              *mediacore.MediaServer
-	gs              *storage.Client
+	sc              *clientv1.ServiceClient
+	webRtcStreamer  *webrtc.Streamer
 	bh              *storage.BucketHandle
 }
 
-func NewServer(opts *ServerOpts) (*Server, error) {
-	grpcOpts := grpcutil.DefaultServerOpts(opts.Logger)
+func NewServer(ctx context.Context, opts *ServerOpts) (*Server, error) {
+	grpcOpts := grpcutil.DefaultServerOpts(ctxlogrus.Extract(ctx))
 	grpcServer := grpc.NewServer(grpcOpts...)
 
 	healthService := health.NewServer()
@@ -66,17 +61,14 @@ func NewServer(opts *ServerOpts) (*Server, error) {
 	}
 
 	rpcServer := &Server{
-		logger:          opts.Logger.WithField("system", "rpc"),
+		logger:          ctxlogrus.Extract(ctx).WithField("system", "rpc"),
 		validator:       newRequestValidator(),
 		addr:            opts.Addr,
 		authTokenSecret: opts.AuthTokenSecret,
-		bucket:          opts.Bucket,
 		grpc:            grpcServer,
 		listen:          listen,
-		users:           opts.Users,
-		streams:         opts.Streams,
-		ms:              opts.MS,
-		gs:              gscli,
+		sc:              opts.SC,
+		webRtcStreamer:  opts.WebRTCStreamer,
 		bh:              bh,
 	}
 
@@ -89,4 +81,9 @@ func NewServer(opts *ServerOpts) (*Server, error) {
 func (s *Server) Start() error {
 	s.logger.Infof("starting rpc server on %s", s.addr)
 	return s.grpc.Serve(s.listen)
+}
+
+func (s *Server) Stop() error {
+	s.grpc.GracefulStop()
+	return nil
 }
