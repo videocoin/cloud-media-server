@@ -1,4 +1,4 @@
-FROM registry.videocoin.net/cloud/mediaserver-base:v0.1
+FROM registry.videocoin.net/cloud/mediaserver-base:1.0
 
 ADD ./deploy/nginx-rtmp /usr/local/nginx-rtmp
 

@@ -37,10 +37,10 @@ docker-lint:
 	docker build -f Dockerfile.lint .
 
 docker-build-base:
-	docker build -t ${REGISTRY_SERVER}/${REGISTRY_PROJECT}/mediaserver-base:v0.1 -f Dockerfile.base .
+	docker build -t ${REGISTRY_SERVER}/${REGISTRY_PROJECT}/mediaserver-base:1.0 -f Dockerfile.base .
 
 docker-push-base:
-	docker push ${REGISTRY_SERVER}/${REGISTRY_PROJECT}/mediaserver-base:v0.1
+	docker push ${REGISTRY_SERVER}/${REGISTRY_PROJECT}/mediaserver-base:1.0
 
 docker-build:
 	docker build -t ${REGISTRY_SERVER}/${REGISTRY_PROJECT}/${NAME}:${VERSION} -f Dockerfile .
