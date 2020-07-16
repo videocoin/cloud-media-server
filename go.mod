@@ -1,4 +1,4 @@
-module github.com/videocoin/mediaserver
+module github.com/videocoin/cloud-media-server
 
 go 1.14
 

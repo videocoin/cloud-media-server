@@ -10,7 +10,7 @@ import (
 	"github.com/kelseyhightower/envconfig"
 	pkglogger "github.com/videocoin/cloud-pkg/logger"
 	"github.com/videocoin/cloud-pkg/tracer"
-	"github.com/videocoin/mediaserver/app"
+	"github.com/videocoin/cloud-media-server/app"
 )
 
 var (

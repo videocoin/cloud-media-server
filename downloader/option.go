@@ -2,7 +2,7 @@ package downloader
 
 import (
 	"github.com/sirupsen/logrus"
-	"github.com/videocoin/mediaserver/datastore"
+	"github.com/videocoin/cloud-media-server/datastore"
 )
 
 type Option func(*Downloader)

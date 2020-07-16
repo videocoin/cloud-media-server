@@ -5,10 +5,10 @@ import (
 	"context"
 	"github.com/sirupsen/logrus"
 	clientv1 "github.com/videocoin/cloud-api/client/v1"
-	"github.com/videocoin/mediaserver/datastore"
-	"github.com/videocoin/mediaserver/downloader"
-	"github.com/videocoin/mediaserver/eventbus"
-	"github.com/videocoin/mediaserver/mediacore/splitter"
+	"github.com/videocoin/cloud-media-server/datastore"
+	"github.com/videocoin/cloud-media-server/downloader"
+	"github.com/videocoin/cloud-media-server/eventbus"
+	"github.com/videocoin/cloud-media-server/mediacore/splitter"
 )
 
 type Option func(*Server) error

@@ -2,7 +2,7 @@ FROM registry.videocoin.net/cloud/mediaserver-base:1.0
 
 ADD ./deploy/nginx-rtmp /usr/local/nginx-rtmp
 
-WORKDIR /root/go/src/github.com/videocoin/mediaserver
+WORKDIR /root/go/src/github.com/videocoin/cloud-media-server
 ADD ./ ./
 RUN make build
 

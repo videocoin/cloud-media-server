@@ -3,7 +3,7 @@ package uploader
 import (
 	"github.com/sirupsen/logrus"
 	clientv1 "github.com/videocoin/cloud-api/client/v1"
-	"github.com/videocoin/mediaserver/datastore"
+	"github.com/videocoin/cloud-media-server/datastore"
 )
 
 type Option func(*Uploader)

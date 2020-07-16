@@ -5,13 +5,13 @@ import (
 	"github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus/ctxlogrus"
 	"github.com/sirupsen/logrus"
 	clientv1 "github.com/videocoin/cloud-api/client/v1"
-	"github.com/videocoin/mediaserver/cleaner"
-	"github.com/videocoin/mediaserver/datastore"
-	"github.com/videocoin/mediaserver/eventbus"
-	"github.com/videocoin/mediaserver/mediacore/webrtc"
-	"github.com/videocoin/mediaserver/rest"
-	"github.com/videocoin/mediaserver/rpc"
-	"github.com/videocoin/mediaserver/uploader"
+	"github.com/videocoin/cloud-media-server/cleaner"
+	"github.com/videocoin/cloud-media-server/datastore"
+	"github.com/videocoin/cloud-media-server/eventbus"
+	"github.com/videocoin/cloud-media-server/mediacore/webrtc"
+	"github.com/videocoin/cloud-media-server/rest"
+	"github.com/videocoin/cloud-media-server/rpc"
+	"github.com/videocoin/cloud-media-server/uploader"
 )
 
 type App struct {

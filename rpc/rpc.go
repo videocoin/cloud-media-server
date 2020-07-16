@@ -3,7 +3,7 @@ package rpc
 import (
 	"context"
 	pstreamsv1 "github.com/videocoin/cloud-api/streams/private/v1"
-	"github.com/videocoin/mediaserver/mediacore"
+	"github.com/videocoin/cloud-media-server/mediacore"
 	"os"
 
 	"github.com/opentracing/opentracing-go"

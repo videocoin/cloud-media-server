@@ -10,7 +10,7 @@ import (
 	msgo "github.com/notedit/media-server-go"
 	"github.com/notedit/sdp"
 	"github.com/sirupsen/logrus"
-	"github.com/videocoin/mediaserver/mediacore/gstrtmp"
+	"github.com/videocoin/cloud-media-server/mediacore/gstrtmp"
 )
 
 func init() {

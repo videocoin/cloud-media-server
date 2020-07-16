@@ -8,7 +8,7 @@ import (
 	clientv1 "github.com/videocoin/cloud-api/client/v1"
 	v1 "github.com/videocoin/cloud-api/mediaserver/v1"
 	"github.com/videocoin/cloud-pkg/grpcutil"
-	"github.com/videocoin/mediaserver/mediacore/webrtc"
+	"github.com/videocoin/cloud-media-server/mediacore/webrtc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
 	healthv1 "google.golang.org/grpc/health/grpc_health_v1"

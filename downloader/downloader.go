@@ -13,7 +13,7 @@ import (
 
 	"github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus/ctxlogrus"
 	"github.com/sirupsen/logrus"
-	"github.com/videocoin/mediaserver/datastore"
+	"github.com/videocoin/cloud-media-server/datastore"
 	"google.golang.org/api/drive/v2"
 	"google.golang.org/api/option"
 )

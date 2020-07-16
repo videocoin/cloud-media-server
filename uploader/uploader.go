@@ -6,9 +6,9 @@ import (
 	"github.com/sirupsen/logrus"
 	clientv1 "github.com/videocoin/cloud-api/client/v1"
 	pstreamsv1 "github.com/videocoin/cloud-api/streams/private/v1"
-	"github.com/videocoin/mediaserver/datastore"
-	"github.com/videocoin/mediaserver/mediacore/splitter"
-	"github.com/videocoin/mediaserver/downloader"
+	"github.com/videocoin/cloud-media-server/datastore"
+	"github.com/videocoin/cloud-media-server/mediacore/splitter"
+	"github.com/videocoin/cloud-media-server/downloader"
 )
 
 type Uploader struct {

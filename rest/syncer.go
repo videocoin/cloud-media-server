@@ -10,7 +10,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 	streamsv1 "github.com/videocoin/cloud-api/streams/v1"
-	"github.com/videocoin/mediaserver/datastore"
+	"github.com/videocoin/cloud-media-server/datastore"
 	"io"
 	"mime/multipart"
 	"net/http"

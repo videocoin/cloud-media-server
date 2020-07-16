@@ -8,7 +8,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/videocoin/mediaserver/mediacore/hls"
+	"github.com/videocoin/cloud-media-server/mediacore/hls"
 
 	grpclogrus "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
 	"github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus/ctxlogrus"
