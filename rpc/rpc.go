@@ -5,6 +5,7 @@ import (
 	pstreamsv1 "github.com/videocoin/cloud-api/streams/private/v1"
 	"github.com/videocoin/cloud-media-server/mediacore"
 	"os"
+	"strings"
 
 	"github.com/opentracing/opentracing-go"
 	v1 "github.com/videocoin/cloud-api/mediaserver/v1"
@@ -64,14 +65,28 @@ func (s *Server) Mux(ctx context.Context, req *v1.MuxRequest) (*v1.MuxResponse, 
 		WithField("input_url", req.InputUrl).
 		WithField("bucket", s.bucket)
 
-	if req.StreamId == "" || req.InputUrl == "" {
+	if req.StreamId == "" {
 		return nil, rpc.ErrRpcBadRequest
 	}
 
 	go func() {
+		logger.Info("getting stream")
+
+		streamReq := &pstreamsv1.StreamRequest{Id: req.StreamId}
+		streamResp, err := s.sc.Streams.Get(context.Background(), streamReq)
+		if err != nil {
+			logger.WithError(err).Error("failed to get stream")
+			return
+		}
+
+		inputURL := strings.Replace(streamResp.OutputURL, "/index.mp4", "/index.m3u8", -1)
+
+		span.SetTag("input_url", inputURL)
+		logger = logger.WithField("input_url", inputURL)
+
 		logger.Info("muxing")
 
-		outPath, err := mediacore.MuxToMp4(req.StreamId, req.InputUrl)
+		outPath, err := mediacore.MuxToMp4(req.StreamId, inputURL)
 		if err != nil {
 			logger.WithError(err).Error("failed to mux to file")
 			return
