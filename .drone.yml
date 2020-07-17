@@ -95,4 +95,4 @@ trigger:
   event:
     - push
   branch:
-    - infra
+    - v2
