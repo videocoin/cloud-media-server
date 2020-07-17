@@ -37,6 +37,22 @@ autoscaler:
   targets:
     targetCPUUtilizationPercentage: 70
 
+api:
+  ingress:
+    enabled: true
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-dns-prod
+      kubernetes.io/ingress.class: nginx
+    hosts:
+      - host: console.dev.videocoin.net
+        paths:
+          - "/api/v1/upload"
+          - "/api/v1/sync"
+    tls:
+      - secretName: tls-cert-console-mediaserver-api
+        hosts:
+          - console.dev.videocoin.net
+
 annotations:
   vault.hashicorp.com/agent-inject: "true"
   vault.hashicorp.com/role: "console-mediaserver"
