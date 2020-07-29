@@ -4,8 +4,6 @@ metadata:
   name: {{ .Chart.Name }}
   labels:
     app: {{ .Chart.Name }}
-    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-    heritage: {{ .Release.Service }}
 spec:
   ports:
     - port: {{ .Values.service.ports.grpc }}
@@ -22,6 +20,8 @@ spec:
       name: http
   selector:
     app: {{ .Chart.Name }}
+
+
 ---
 apiVersion: v1
 kind: Service
@@ -29,8 +29,6 @@ metadata:
   name: "{{ .Chart.Name }}-webrtc-lb"
   labels:
     app: {{ .Chart.Name }}
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-    heritage: "{{ .Release.Service }}"
 spec:
   type: LoadBalancer
   loadBalancerIP: {{ .Values.service.loadBalancerIP.webrtc }}
@@ -41,6 +39,8 @@ spec:
     protocol: UDP
   selector:
     app: {{ .Chart.Name }}
+
+
 ---
 apiVersion: v1
 kind: Service
@@ -48,8 +48,6 @@ metadata:
   name: "{{ .Chart.Name }}-rtmp-lb"
   labels:
     app: {{ .Chart.Name }}
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-    heritage: "{{ .Release.Service }}"
 spec:
   type: LoadBalancer
   loadBalancerIP: {{ .Values.service.loadBalancerIP.rtmp }}

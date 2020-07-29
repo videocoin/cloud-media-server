@@ -1,11 +1,9 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}
+  name: {{ .Chart.Name }}
   labels:
-    app: {{ .Release.Name }}
-    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-    heritage: {{ .Release.Service }}
+    app: {{ .Chart.Name }}
 spec:
   replicas: {{ .Values.replicasCount | default  "1" }}
   strategy:
@@ -13,15 +11,15 @@ spec:
       maxUnavailable: {{ .Values.maxUnavailableCount }}
   template:
     metadata:
-      name: {{ .Release.Name }}
+      name: {{ .Chart.Name }}
       labels:
-        app: {{ .Release.Name }}
+        app: {{ .Chart.Name }}
     {{- with .Values.annotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
     {{- end }}
     spec:
-    {{- with .Values.imagePullSecrets }}
+    {{- with .Values.image.pullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
     {{- end }}
@@ -75,7 +73,7 @@ spec:
       volumes:
         - name: config
           configMap:
-            name: {{ .Release.Name }}
+            name: {{ .Chart.Name }}
         - name: {{ .Chart.Name }}-fs
           persistentVolumeClaim:
             claimName: {{ .Chart.Name }}-fs
