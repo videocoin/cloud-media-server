@@ -45,18 +45,27 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ .Chart.Name }}
+          volumeMounts:
+          - name: data
+            mountPath: /data
         - name: nginx-rtmp
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command: ["/usr/local/nginx-rtmp/sbin/nginx", "-c", "/usr/local/nginx-rtmp/etc/stream-ingester-rtmp.conf", "-g", "daemon off;"]
           ports:
             - containerPort: {{ .Values.service.ports.rtmp }}
+          volumeMounts:
+          - name: data
+            mountPath: /data
         - name: nginx-http
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command: ["/usr/local/nginx-rtmp/sbin/nginx", "-c", "/usr/local/nginx-rtmp/etc/stream-ingester-http.conf", "-g", "daemon off;"]
           ports:
             - containerPort: {{ .Values.service.ports.http }}
+          volumeMounts:
+          - name: data
+            mountPath: /data
           {{- if .Values.resources }}
           resources:
 {{ toYaml .Values.resources | indent 12 }}
@@ -65,6 +74,8 @@ spec:
         - name: config
           configMap:
             name: {{ .Chart.Name }}
+        - name: data
+          emptyDir: {}
     {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
