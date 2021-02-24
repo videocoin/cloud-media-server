@@ -1,3 +1,4 @@
+{{- if eq .Values.enableSharedFs true }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -9,3 +10,4 @@ spec:
   resources:
     requests:
       storage: 1T
+{{- end }}

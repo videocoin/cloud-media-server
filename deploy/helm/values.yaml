@@ -12,6 +12,9 @@ serviceAccount:
   name: default
 
 config:
+  enableSharedFs: false
+  fsAddr: ""
+  fsPath: ""
   USERS_RPC_ADDR: "users.console.svc.cluster.local:5000"
   STREAMS_RPC_ADDR: "streams.console.svc.cluster.local:5102"
   DISPATCHER_RPC_ADDR: "dispatcher.console.svc.cluster.local:5008"
