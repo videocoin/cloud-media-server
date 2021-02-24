@@ -1,4 +1,3 @@
-{{- if eq .Values.enableSharedFs true }}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -11,4 +10,3 @@ spec:
   nfs:
     path: /{{ .Values.config.fsPath }}
     server: {{ .Values.config.fsAddr }}
-{{- end }}
