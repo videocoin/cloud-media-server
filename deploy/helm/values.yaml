@@ -11,6 +11,8 @@ image:
 serviceAccount:
   name: default
 
+enableSharedFs: false
+
 config:
   USERS_RPC_ADDR: "users.console.svc.cluster.local:5000"
   STREAMS_RPC_ADDR: "streams.console.svc.cluster.local:5102"

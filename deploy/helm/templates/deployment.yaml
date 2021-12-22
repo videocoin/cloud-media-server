@@ -49,8 +49,8 @@ spec:
             - configMapRef:
                 name: {{ .Chart.Name }}
           volumeMounts:
-          - name: data
-            mountPath: /data
+          - name: {{ .Chart.Name }}-fs
+            mountPath: /data/studio
         - name: nginx-rtmp
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
@@ -58,8 +58,8 @@ spec:
           ports:
             - containerPort: {{ .Values.service.ports.rtmp }}
           volumeMounts:
-          - name: data
-            mountPath: /data
+          - name: {{ .Chart.Name }}-fs
+            mountPath: /data/studio
         - name: nginx-http
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
@@ -67,8 +67,8 @@ spec:
           ports:
             - containerPort: {{ .Values.service.ports.http }}
           volumeMounts:
-          - name: data
-            mountPath: /data
+          - name: {{ .Chart.Name }}-fs
+            mountPath: /data/studio
           {{- if .Values.resources }}
           resources:
 {{ toYaml .Values.resources | indent 12 }}
@@ -77,7 +77,7 @@ spec:
         - name: config
           configMap:
             name: {{ .Chart.Name }}
-        - name: data
+        - name: {{ .Chart.Name }}-fs
           emptyDir: {}
     {{- with .Values.nodeSelector }}
       nodeSelector:
