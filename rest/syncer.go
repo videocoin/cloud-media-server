@@ -2,30 +2,33 @@ package rest
 
 import (
 	"bytes"
-	"cloud.google.com/go/storage"
 	"context"
 	"errors"
 	"fmt"
-	"github.com/grafov/m3u8"
-	"github.com/labstack/echo/v4"
-	"github.com/sirupsen/logrus"
-	streamsv1 "github.com/videocoin/cloud-api/streams/v1"
-	"github.com/videocoin/cloud-media-server/datastore"
 	"io"
 	"mime/multipart"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"cloud.google.com/go/storage"
+	"github.com/grafov/m3u8"
+	"github.com/labstack/echo/v4"
+	"github.com/sirupsen/logrus"
+	streamsv1 "github.com/videocoin/cloud-api/streams/v1"
+	"github.com/videocoin/cloud-media-server/datastore"
 )
 
 const (
-	noCache      = "no-cache"
-	mimeTypeM3U8 = "application/x-mpegURL"
+	noCache        = "no-cache"
+	mimeTypeM3U8   = "application/x-mpegURL"
+	mimeTypeMPEGTS = "video/mp2t"
+	mimeTypeMP4    = "video/mp4"
 )
 
 func (s *Server) sync(c echo.Context) error {
 	path := c.FormValue("path")
-	ct := c.FormValue("ct")
+	ct := strings.ToLower(c.FormValue("ct"))
 	vod := c.FormValue("vod")
 	last := c.FormValue("last")
 	durationStr := c.FormValue("duration")
@@ -88,7 +91,7 @@ func (s *Server) sync(c echo.Context) error {
 
 	if !isVOD {
 		logger.Info("generating and uploading live master playlist")
-		_, _, err = s.generateAndUploadLiveMasterPlaylist(emptyCtx, streamID, segments, isLast)
+		_, _, err = s.generateAndUploadLiveMasterPlaylist(emptyCtx, streamID, segments, ct, isLast)
 		if err != nil {
 			e := fmt.Errorf("failed to generate live master playlist: %s", err.Error())
 			s.logger.Error(e)
@@ -105,7 +108,7 @@ func (s *Server) sync(c echo.Context) error {
 	} else {
 		if len(segments) > 0 {
 			logger.Info("generating and uploading vod master playlist")
-			_, _, err = s.generateAndUploadVODMasterPlaylist(emptyCtx, streamID, segments)
+			_, _, err = s.generateAndUploadVODMasterPlaylist(emptyCtx, streamID, segments, ct)
 			if err != nil {
 				e := fmt.Errorf("failed to generate vod master playlist: %s", err.Error())
 				s.logger.Error(e)
@@ -118,7 +121,11 @@ func (s *Server) sync(c echo.Context) error {
 }
 
 func (s *Server) uploadSegment(ctx context.Context, streamID string, segmentNum int, ct string, src multipart.File) (*storage.ObjectHandle, *storage.ObjectAttrs, error) {
-	objectName := fmt.Sprintf("%s/%d.ts", streamID, segmentNum)
+	ext := ".ts"
+	if ct == mimeTypeMP4 {
+		ext = ".mp4"
+	}
+	objectName := fmt.Sprintf("%s/%d%s", streamID, segmentNum, ext)
 
 	logger := s.logger.WithFields(logrus.Fields{
 		"stream_id":   streamID,
@@ -160,16 +167,23 @@ func (s *Server) generateAndUploadLiveMasterPlaylist(
 	ctx context.Context,
 	streamID string,
 	segments []*datastore.Segment,
+	ct string,
 	last bool,
 ) (*storage.ObjectHandle, *storage.ObjectAttrs, error) {
 	objectName := fmt.Sprintf("%s/index.m3u8", streamID)
 	tmpObjectName := fmt.Sprintf("%s/_index.m3u8", streamID)
+
+	ext := ".ts"
+	if ct == mimeTypeMP4 {
+		ext = ".mp4"
+	}
 
 	logger := s.logger.WithFields(logrus.Fields{
 		"stream_id":   streamID,
 		"bucket":      s.bucket,
 		"object_name": objectName,
 		"last":        last,
+		"ct":          ct,
 	})
 
 	logger.Info("generating live master playlist")
@@ -185,7 +199,7 @@ func (s *Server) generateAndUploadLiveMasterPlaylist(
 	}
 
 	for _, segment := range segments {
-		err := p.Append(fmt.Sprintf("%d.ts", segment.Num), segment.Duration, "")
+		err := p.Append(fmt.Sprintf("%d%s", segment.Num, ext), segment.Duration, "")
 		if err != nil {
 			return nil, nil, err
 		}
@@ -248,14 +262,21 @@ func (s *Server) generateAndUploadVODMasterPlaylist(
 	ctx context.Context,
 	streamID string,
 	segments []*datastore.Segment,
+	ct string,
 ) (*storage.ObjectHandle, *storage.ObjectAttrs, error) {
 	objectName := fmt.Sprintf("%s/index.m3u8", streamID)
 	tmpObjectName := fmt.Sprintf("%s/_index.m3u8", streamID)
+
+	ext := ".ts"
+	if ct == mimeTypeMP4 {
+		ext = ".mp4"
+	}
 
 	logger := s.logger.WithFields(logrus.Fields{
 		"stream_id":   streamID,
 		"bucket":      s.bucket,
 		"object_name": objectName,
+		"ct":          ct,
 	})
 
 	logger.Info("generating vod master playlist")
@@ -269,7 +290,7 @@ func (s *Server) generateAndUploadVODMasterPlaylist(
 	p.MediaType = m3u8.VOD
 
 	for _, segment := range segments {
-		err := p.Append(fmt.Sprintf("%d.ts", segment.Num), segment.Duration, "")
+		err := p.Append(fmt.Sprintf("%d%s", segment.Num, ext), segment.Duration, "")
 		if err != nil {
 			return nil, nil, err
 		}
