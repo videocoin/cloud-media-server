@@ -145,7 +145,7 @@ func (s *Splitter) Split(ctx context.Context, f *MediaFile) error {
 		"-map",
 		"0:v",
 		"-map",
-		"0:a",
+		"0:a?",
 		"-f",
 		"segment",
 		"-segment_time",
