@@ -1,7 +1,7 @@
 {{- if .Values.api.ingress.enabled -}}
 {{- $releaseName := .Chart.Name -}}
 {{- $svcPort := .Values.service.ports.restapi -}}
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ .Chart.Name }}-api
@@ -29,9 +29,12 @@ spec:
         paths:
         {{- range .paths }}
           - path: {{ . }}
+            pathType: Prefix
             backend:
-              serviceName: {{ $releaseName }}
-              servicePort: {{ $svcPort }}
+              service:
+                name: {{ $releaseName }}
+                port: 
+                  number: {{ $svcPort }}
         {{- end }}
   {{- end }}
 {{- end }}

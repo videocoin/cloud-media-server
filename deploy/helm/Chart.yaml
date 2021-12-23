@@ -1,4 +1,4 @@
 apiVersion: v2
 name: mediaserver
-version: 1.4.0
+version: 1.4.1
 appVersion: 2.0.0
