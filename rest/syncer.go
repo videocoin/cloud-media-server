@@ -15,6 +15,7 @@ import (
 	"github.com/grafov/m3u8"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
+	pStreamsV1 "github.com/videocoin/cloud-api/streams/private/v1"
 	streamsv1 "github.com/videocoin/cloud-api/streams/v1"
 	"github.com/videocoin/cloud-media-server/datastore"
 )
@@ -113,6 +114,26 @@ func (s *Server) sync(c echo.Context) error {
 				e := fmt.Errorf("failed to generate vod master playlist: %s", err.Error())
 				s.logger.Error(e)
 				return e
+			}
+
+			streamResp, err := s.sc.Streams.Get(emptyCtx, &pStreamsV1.StreamRequest{Id: streamID})
+			if err != nil {
+				e := fmt.Errorf("failed to get stream: %s", err.Error())
+				s.logger.Error(e)
+				return e
+			}
+
+			if streamResp.OutputType == streamsv1.OutputTypeDash ||
+				streamResp.OutputType == streamsv1.OutputTypeDashWithDRM {
+
+				logger.Info("generating and uploading mpd manifest")
+				_, _, err = s.generateAndUploadMPD(emptyCtx, streamID, segments, ct)
+				if err != nil {
+					e := fmt.Errorf("failed to generate mpd manifest: %s", err.Error())
+					s.logger.Error(e)
+					return e
+				}
+
 			}
 		}
 	}
@@ -343,6 +364,95 @@ func (s *Server) generateAndUploadVODMasterPlaylist(
 	}
 
 	logger.Info("vod master playlist has been uploaded successfully")
+
+	return obj, attrs, err
+}
+
+func (s *Server) generateAndUploadMPD(
+	ctx context.Context,
+	streamID string,
+	segments []*datastore.Segment,
+	ct string,
+) (*storage.ObjectHandle, *storage.ObjectAttrs, error) {
+	objectName := fmt.Sprintf("%s/index.m3u8", streamID)
+	tmpObjectName := fmt.Sprintf("%s/_index.mpd", streamID)
+
+	ext := ".ts"
+	if ct == mimeTypeMP4 {
+		ext = ".mp4"
+	}
+
+	logger := s.logger.WithFields(logrus.Fields{
+		"stream_id":   streamID,
+		"bucket":      s.bucket,
+		"object_name": objectName,
+		"ct":          ct,
+	})
+
+	logger.Info("generating mpd manifest")
+
+	segmentsCount := len(segments)
+	p, err := m3u8.NewMediaPlaylist(uint(segmentsCount), uint(segmentsCount))
+	if err != nil {
+		return nil, nil, err
+	}
+
+	p.MediaType = m3u8.VOD
+
+	for _, segment := range segments {
+		err := p.Append(fmt.Sprintf("%d%s", segment.Num, ext), segment.Duration, "")
+		if err != nil {
+			return nil, nil, err
+		}
+	}
+
+	p.Close()
+
+	data := p.Encode().Bytes()
+
+	logger.Info("uploading mpd manifest")
+
+	obj := s.bh.Object(tmpObjectName)
+
+	w := obj.NewWriter(ctx)
+	w.CacheControl = noCache
+	w.ContentType = mimeTypeM3U8
+
+	if _, err := io.Copy(w, bytes.NewReader(data)); err != nil {
+		return nil, nil, err
+	}
+
+	if err := w.Close(); err != nil {
+		return nil, nil, err
+	}
+
+	if err := obj.ACL().Set(ctx, storage.AllUsers, storage.RoleReader); err != nil {
+		return nil, nil, err
+	}
+
+	dst := s.bh.Object(objectName)
+
+	copier := dst.CopierFrom(obj)
+	copier.ACL = []storage.ACLRule{
+		{
+			Entity: storage.AllUsers,
+			Role:   storage.RoleReader,
+		},
+	}
+	copier.ContentType = mimeTypeM3U8
+	copier.CacheControl = "private, max-age=0, no-transform"
+
+	_, err = copier.Run(context.Background())
+	if err != nil {
+		return nil, nil, err
+	}
+
+	attrs, err := obj.Attrs(ctx)
+	if err != nil {
+		return obj, attrs, err
+	}
+
+	logger.Info("mpd manifest has been uploaded successfully")
 
 	return obj, attrs, err
 }
