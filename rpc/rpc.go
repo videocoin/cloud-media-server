@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	pstreamsv1 "github.com/videocoin/cloud-api/streams/private/v1"
+	streamsv1 "github.com/videocoin/cloud-api/streams/v1"
 	"github.com/videocoin/cloud-media-server/mediacore"
 
 	"github.com/opentracing/opentracing-go"
@@ -79,6 +80,10 @@ func (s *Server) Mux(ctx context.Context, req *v1.MuxRequest) (*v1.MuxResponse, 
 	if err != nil {
 		logger.WithError(err).Error("failed to get stream")
 		return emptyResp, err
+	}
+
+	if streamResp.OutputType == streamsv1.OutputTypeHLS {
+		return emptyResp, nil
 	}
 
 	inputURL := strings.Replace(streamResp.OutputURL, "/index.mp4", "/index.m3u8", -1)
