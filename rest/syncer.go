@@ -15,7 +15,6 @@ import (
 	"github.com/grafov/m3u8"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
-	pStreamsV1 "github.com/videocoin/cloud-api/streams/private/v1"
 	streamsv1 "github.com/videocoin/cloud-api/streams/v1"
 	"github.com/videocoin/cloud-media-server/datastore"
 )
@@ -114,26 +113,6 @@ func (s *Server) sync(c echo.Context) error {
 				e := fmt.Errorf("failed to generate vod master playlist: %s", err.Error())
 				s.logger.Error(e)
 				return e
-			}
-
-			streamResp, err := s.sc.Streams.Get(emptyCtx, &pStreamsV1.StreamRequest{Id: streamID})
-			if err != nil {
-				e := fmt.Errorf("failed to get stream: %s", err.Error())
-				s.logger.Error(e)
-				return e
-			}
-
-			if streamResp.OutputType == streamsv1.OutputTypeDash ||
-				streamResp.OutputType == streamsv1.OutputTypeDashWithDRM {
-
-				logger.Info("generating and uploading mpd manifest")
-				_, _, err = s.generateAndUploadMPD(emptyCtx, streamID, segments, ct)
-				if err != nil {
-					e := fmt.Errorf("failed to generate mpd manifest: %s", err.Error())
-					s.logger.Error(e)
-					return e
-				}
-
 			}
 		}
 	}
