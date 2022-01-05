@@ -2,10 +2,11 @@ package rpc
 
 import (
 	"context"
-	pstreamsv1 "github.com/videocoin/cloud-api/streams/private/v1"
-	"github.com/videocoin/cloud-media-server/mediacore"
 	"os"
 	"strings"
+
+	pstreamsv1 "github.com/videocoin/cloud-api/streams/private/v1"
+	"github.com/videocoin/cloud-media-server/mediacore"
 
 	"github.com/opentracing/opentracing-go"
 	v1 "github.com/videocoin/cloud-api/mediaserver/v1"
@@ -60,6 +61,8 @@ func (s *Server) Mux(ctx context.Context, req *v1.MuxRequest) (*v1.MuxResponse, 
 	span.SetTag("input_url", req.InputUrl)
 	span.SetTag("bucket", s.bucket)
 
+	emptyResp := &v1.MuxResponse{}
+
 	logger := s.logger.
 		WithField("stream_id", req.StreamId).
 		WithField("input_url", req.InputUrl).
@@ -69,74 +72,72 @@ func (s *Server) Mux(ctx context.Context, req *v1.MuxRequest) (*v1.MuxResponse, 
 		return nil, rpc.ErrRpcBadRequest
 	}
 
-	go func() {
-		logger.Info("getting stream")
+	logger.Info("getting stream")
 
-		streamReq := &pstreamsv1.StreamRequest{Id: req.StreamId}
-		streamResp, err := s.sc.Streams.Get(context.Background(), streamReq)
+	streamReq := &pstreamsv1.StreamRequest{Id: req.StreamId}
+	streamResp, err := s.sc.Streams.Get(context.Background(), streamReq)
+	if err != nil {
+		logger.WithError(err).Error("failed to get stream")
+		return emptyResp, err
+	}
+
+	inputURL := strings.Replace(streamResp.OutputURL, "/index.mp4", "/index.m3u8", -1)
+
+	span.SetTag("input_url", inputURL)
+	logger = logger.WithField("input_url", inputURL)
+
+	logger.Info("muxing")
+
+	outPath, err := mediacore.MuxToMp4(req.StreamId, inputURL)
+	if err != nil {
+		logger.WithError(err).Error("failed to mux to file")
+		return emptyResp, err
+	}
+
+	logger.WithField("output", outPath).Info("mux has been completed")
+
+	f, err := os.Open(outPath)
+	if err != nil {
+		logger.WithError(err).Error("failed to open file")
+		return emptyResp, err
+	}
+	defer func() {
+		err = f.Close()
 		if err != nil {
-			logger.WithError(err).Error("failed to get stream")
+			logger.WithError(err).Error("failed to close mux file")
 			return
 		}
 
-		inputURL := strings.Replace(streamResp.OutputURL, "/index.mp4", "/index.m3u8", -1)
-
-		span.SetTag("input_url", inputURL)
-		logger = logger.WithField("input_url", inputURL)
-
-		logger.Info("muxing")
-
-		outPath, err := mediacore.MuxToMp4(req.StreamId, inputURL)
+		err = os.Remove(outPath)
 		if err != nil {
-			logger.WithError(err).Error("failed to mux to file")
-			return
-		}
-
-		logger.WithField("output", outPath).Info("mux has been completed")
-
-		f, err := os.Open(outPath)
-		if err != nil {
-			logger.WithError(err).Error("failed to open file")
-			return
-		}
-		defer func() {
-			err = f.Close()
-			if err != nil {
-				logger.WithError(err).Error("failed to close mux file")
-				return
-			}
-
-			err = os.Remove(outPath)
-			if err != nil {
-				logger.WithError(err).Error("failed to remove mux file")
-				return
-			}
-		}()
-
-		logger.Info("uploading mux file to bucket")
-
-		emptyCtx := context.Background()
-		_, _, err = mediacore.UploadFileToBucket(
-			emptyCtx,
-			s.bh,
-			req.StreamId,
-			"index.mp4",
-			mediacore.MimeTypeMP4,
-			f,
-		)
-		if err != nil {
-			logger.WithError(err).Error("failed to upload file to bucket")
-			return
-		}
-
-		logger.Info("upload mux file has been completed")
-
-		_, err = s.sc.Streams.Complete(emptyCtx, &pstreamsv1.StreamRequest{Id: req.StreamId})
-		if err != nil {
-			logger.WithError(err).Error("failed to complete stream")
+			logger.WithError(err).Error("failed to remove mux file")
 			return
 		}
 	}()
 
-	return &v1.MuxResponse{}, nil
+	logger.Info("uploading mux file to bucket")
+
+	emptyCtx := context.Background()
+	_, _, err = mediacore.UploadFileToBucket(
+		emptyCtx,
+		s.bh,
+		req.StreamId,
+		"index.mp4",
+		mediacore.MimeTypeMP4,
+		f,
+	)
+	if err != nil {
+		logger.WithError(err).Error("failed to upload file to bucket")
+		return emptyResp, err
+	}
+
+	logger.Info("upload mux file has been completed")
+
+	_, err = s.sc.Streams.Complete(emptyCtx, &pstreamsv1.StreamRequest{Id: req.StreamId})
+	if err != nil {
+		logger.WithError(err).Error("failed to complete stream")
+		return emptyResp, err
+	}
+
+	return emptyResp, nil
 }
