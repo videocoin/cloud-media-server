@@ -1,12 +1,14 @@
 package mediacore
 
 import (
-	"cloud.google.com/go/storage"
 	"context"
 	"fmt"
 	"io"
 	"os"
 	"os/exec"
+	"strings"
+
+	"cloud.google.com/go/storage"
 )
 
 const (
@@ -27,12 +29,14 @@ func MuxToMp4(streamID string, inputURL string) (string, error) {
 		"-map",
 		"0:v",
 		"-map",
-		"0:a",
+		"'0:a?'",
 		"-f",
 		"mp4",
 		outputPath,
 	}
 	cmd := exec.Command("ffmpeg", execArgs...)
+
+	fmt.Println("ffmpeg " + strings.Join(execArgs, " "))
 
 	cmdOut, err := cmd.Output()
 	if err != nil {
