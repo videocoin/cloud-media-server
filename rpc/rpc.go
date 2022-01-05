@@ -197,6 +197,8 @@ func (s *Server) muxToMpegDash(ctx context.Context, req *v1.MuxRequest, stream *
 			return fmt.Errorf("failed to write drm xml: %s", err)
 		}
 
+		defer os.Remove(fpDrmXml)
+
 		_, err := mediacore.MP4BoxCryptExec(fpDrmXml, fpMp4, fpEncryptedMp4)
 		if err != nil {
 			return fmt.Errorf("failed to crypt mp4: %s", err)
